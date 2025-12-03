@@ -1,0 +1,172 @@
+{
+    "meta": {
+      "system_name": "ENSA CONNECT",
+      "version": "1.1.0",
+      "description": "A high-contrast, playful yet professional dashboard aesthetic characterized by a saturated Lime background, rounded geometries, and clean sans-serif typography.",
+      "core_philosophy": [
+        "Soft Geometry: Aggressive border-radius (24px for cards, Full for buttons).",
+        "High Contrast: Dark content on Light cards, floating on a Lime background.",
+        "Clarity: Generous whitespace (padding) within containers.",
+        "Playfulness: Use of bright accent colors (Lime, Purple) for interactions and status."
+      ]
+    },
+    "foundations": {
+      "colors": {
+        "palette": {
+          "lime": {
+            "500": "#D8F26E",
+            "label": "Brand Primary / Background"
+          },
+          "purple": {
+            "500": "#8B5CF6",
+            "label": "Brand Accent / Active State"
+          },
+          "neutral": {
+            "900": "#111827",
+            "label": "Text Primary / Inverse Background"
+          },
+          "gray": {
+            "50": "#F9FAFB",
+            "100": "#F3F4F6",
+            "200": "#E5E7EB",
+            "400": "#9CA3AF",
+            "600": "#4B5563",
+            "800": "#1F2937"
+          },
+          "white": "#FFFFFF",
+          "danger": "#EF4444",
+          "success": "#10B981"
+        },
+        "usage": {
+          "app_background": "lime.500",
+          "card_background": "white",
+          "card_background_inverted": "neutral.900",
+          "text_primary": "neutral.900",
+          "text_secondary": "gray.400",
+          "border_subtle": "gray.200"
+        }
+      },
+      "typography": {
+        "font_family": "Inter, sans-serif",
+        "hierarchy": {
+          "h1": { "size": "3xl/4xl", "weight": "bold", "tracking": "tight" },
+          "h2": { "size": "2xl/3xl", "weight": "bold", "tracking": "tight" },
+          "h3": { "size": "xl/2xl", "weight": "bold", "tracking": "tight" },
+          "body": { "size": "base", "weight": "normal", "line_height": "normal" },
+          "small": { "size": "sm", "weight": "normal", "color": "text-secondary" },
+          "caption": { "size": "xs", "weight": "medium", "case": "uppercase", "tracking": "wider" }
+        }
+      },
+      "spacing": {
+        "scale": {
+          "xs": "4px",
+          "sm": "8px",
+          "md": "16px",
+          "lg": "24px",
+          "xl": "32px"
+        },
+        "rules": {
+          "card_padding": "p-6",
+          "grid_gap": "gap-6",
+          "stack_gap": "gap-4"
+        }
+      },
+      "shape": {
+        "radius": {
+          "card": "24px",
+          "button": "9999px (Full)",
+          "input": "12px",
+          "tag": "16px",
+          "avatar": "9999px (Circle)"
+        },
+        "shadows": {
+          "card": "0 4px 6px -1px rgba(0, 0, 0, 0.05)",
+          "floating": "0 10px 15px -3px rgba(0, 0, 0, 0.1)"
+        }
+      }
+    },
+    "components": {
+      "atoms": {
+        "Button": {
+          "base": "px-6 py-2.5 rounded-full font-medium transition-colors flex items-center justify-center gap-2",
+          "variants": {
+            "primary": "bg-neutral-900 text-white hover:bg-gray-800 (Primary Action)",
+            "secondary": "bg-lime-500 text-neutral-900 hover:brightness-95 (Brand Action)",
+            "outline": "border border-gray-200 text-neutral-900 hover:bg-gray-50",
+            "ghost": "text-gray-400 hover:text-neutral-900 hover:bg-gray-50"
+          }
+        },
+        "Badge": {
+          "base": "px-2 py-0.5 rounded-full text-xs font-bold",
+          "variants": {
+            "success": "bg-lime-500 text-neutral-900",
+            "neutral": "bg-gray-100 text-gray-600"
+          }
+        },
+        "Tag": {
+          "style": "px-4 py-2 rounded-[16px] border border-gray-200 text-sm font-medium bg-transparent"
+        },
+        "Avatar": {
+          "style": "rounded-full object-cover border-2 border-white",
+          "status_indicator": "absolute bottom-0 right-0 rounded-full border-2 border-white"
+        },
+        "Input": {
+          "style": "bg-white border border-gray-200 rounded-xl py-2.5 px-4 focus:ring-2 focus:ring-purple-500"
+        }
+      },
+      "molecules": {
+        "SectionHeader": {
+          "composition": "Flex container with Heading (Left) and Action/Badge (Right)",
+          "spacing": "mb-4 or mb-6"
+        },
+        "ListRow": {
+          "composition": "Flex row, items-center, hover:bg-gray-50, rounded-xl, padding-3",
+          "elements": ["Avatar/Icon", "Text Content (Title + Subtitle)", "Action Button (Right)"]
+        },
+        "ToggleRow": {
+          "composition": "Flex row, justify-between, border-b border-gray-50 py-4"
+        }
+      },
+      "organisms": {
+        "StandardCard": {
+          "container": "bg-white rounded-[24px] p-6 shadow-sm",
+          "usage": "Default container for most widgets"
+        },
+        "InvertedCard": {
+          "container": "bg-neutral-900 text-white rounded-[24px] p-6",
+          "usage": "High priority stats or milestones (e.g., MilestoneCard)",
+          "overrides": {
+            "text_primary": "text-white",
+            "text_secondary": "text-gray-400",
+            "accent": "text-lime-500"
+          }
+        },
+        "ProfileCard": {
+          "layout": "Flex Column, Centered",
+          "elements": ["ActionMenu(TopRight)", "LargeAvatar", "Name(H3)", "Role(Text-Secondary)", "TagsRow", "ButtonRow"]
+        },
+        "CalendarWidget": {
+          "layout": "Grid (7 cols)",
+          "active_state": "bg-lime-500 text-neutral-900 rounded-lg"
+        },
+        "ProjectCard": {
+          "features": ["ProgressRing (SVG)", "AvatarStack", "Title + Description"]
+        }
+      }
+    },
+    "layout_rules": {
+      "grid_system": {
+        "type": "Responsive Grid / Masonry",
+        "breakpoints": {
+          "mobile": "grid-cols-1",
+          "tablet": "grid-cols-2",
+          "desktop": "grid-cols-3",
+          "large_desktop": "grid-cols-4"
+        }
+      },
+      "container": {
+        "max_width": "max-w-7xl",
+        "padding": "p-4 sm:p-6 md:p-8"
+      }
+    }
+  }

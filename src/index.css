@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-brand-lime: #A9D18E;
+  --color-brand-purple: #8B5CF6;
+  --color-brand-black: #111827;
+  
+  --font-sans: "Inter", sans-serif;
+  
+  --radius-card: 24px;
+  --radius-pill: 9999px;
+}
+
+/* Pulsing Map Marker Animation */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.33);
+    opacity: 1;
+  }
+  80%, 100% {
+    opacity: 0;
+    transform: scale(2.5);
+  }
+}
+
+@keyframes pulse-dot {
+  0% {
+    transform: scale(0.9);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(0.9);
+  }
+}
+
+.pulsing-marker {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px !important;
+  height: 20px !important;
+  background: transparent;
+  border: none;
+}
+
+.pulsing-marker::before {
+  content: '';
+  position: relative;
+  display: block;
+  width: 300%;
+  height: 300%;
+  box-sizing: border-box;
+  margin-left: -100%;
+  margin-top: -100%;
+  border-radius: 45px;
+  background-color: #A9D18E;
+  animation: pulse-ring 2.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  opacity: 0.6;
+}
+
+.pulsing-marker::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-color: #A9D18E;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 8px rgba(0,0,0,0.3);
+  animation: pulse-dot 2.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) -0.4s infinite;
+}
+
+.pulsing-marker-cluster {
+  background: none !important;
+  border: none !important;
+}
+
+.pulsing-marker-cluster div {
+  width: 40px;
+  height: 40px;
+  background-color: #A9D18E;
+  color: #111827;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  border: 3px solid white;
+  box-shadow: 0 4px 12px rgba(169, 209, 142, 0.4);
+}
