@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "import-users": "tsx scripts/importUsers.ts",
+    "delete-users-csv": "tsx scripts/deleteUsersFromCsv.ts",
+    "update-passwords": "tsx scripts/updatePasswords.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.86.0",
@@ -15,12 +18,15 @@
     "@tailwindcss/vite": "^4.1.17",
     "@types/leaflet": "^1.9.21",
     "clsx": "^2.1.1",
+    "csv-parse": "^5.6.0",
+    "dotenv": "^16.6.1",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.555.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-google-autocomplete": "^2.7.5",
     "react-leaflet": "^5.0.0",
+    "react-leaflet-cluster": "^4.0.0",
     "react-router-dom": "^7.9.6",
     "tailwind-merge": "^3.4.0"
   },
@@ -37,6 +43,7 @@
     "globals": "^16.5.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.17",
+    "tsx": "^4.21.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4"

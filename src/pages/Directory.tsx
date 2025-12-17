@@ -48,7 +48,9 @@ export default function Directory() {
     
     if (searchTerm) {
         const fullName = `${member.first_name} ${member.last_name}`.toLowerCase();
-        return fullName.includes(searchTerm.toLowerCase());
+        const company = (member.company || '').toLowerCase();
+        const term = searchTerm.toLowerCase();
+        return fullName.includes(term) || company.includes(term);
     }
     
     return true;

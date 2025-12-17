@@ -81,7 +81,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   const suggestions = searchTerm.length > 0 
-    ? members.filter(m => `${m.first_name} ${m.last_name}`.toLowerCase().includes(searchTerm.toLowerCase())).slice(0, 5)
+    ? members.filter(m => {
+        const fullName = `${m.first_name} ${m.last_name}`.toLowerCase();
+        const company = (m.company || '').toLowerCase();
+        const term = searchTerm.toLowerCase();
+        return fullName.includes(term) || company.includes(term);
+      }).slice(0, 5)
     : [];
 
   return (

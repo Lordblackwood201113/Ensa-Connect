@@ -6,7 +6,7 @@ import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { ImageUpload } from '../components/ui/ImageUpload';
-import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Lock, Eye, EyeOff, Check, AlertCircle } from 'lucide-react';
 import type { Experience, Education } from '../types';
 import Autocomplete from "react-google-autocomplete";
 
@@ -16,6 +16,16 @@ export default function EditProfile() {
   const [loading, setLoading] = useState(false);
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [educations, setEducations] = useState<Education[]>([]);
+  
+  // Password change state
+  const [passwordData, setPasswordData] = useState({
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   
   // Profile Data State
   const [formData, setFormData] = useState({
@@ -141,6 +151,50 @@ export default function EditProfile() {
      await supabase.from('educations').update(updates).eq('id', id);
      setEducations(prev => prev.map(e => e.id === id ? { ...e, ...updates } : e));
  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordMessage(null);
+
+    // Validation
+    if (!passwordData.newPassword || !passwordData.confirmPassword) {
+      setPasswordMessage({ type: 'error', text: 'Veuillez remplir tous les champs.' });
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      setPasswordMessage({ type: 'error', text: 'Le mot de passe doit contenir au moins 6 caractères.' });
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordMessage({ type: 'error', text: 'Les mots de passe ne correspondent pas.' });
+      return;
+    }
+
+    setPasswordLoading(true);
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: passwordData.newPassword
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      setPasswordMessage({ type: 'success', text: 'Mot de passe modifié avec succès !' });
+      setPasswordData({ newPassword: '', confirmPassword: '' });
+    } catch (error: any) {
+      console.error('Error updating password:', error);
+      setPasswordMessage({ 
+        type: 'error', 
+        text: error.message || 'Erreur lors de la modification du mot de passe.' 
+      });
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto pb-20">
@@ -455,6 +509,86 @@ export default function EditProfile() {
                 </Card>
             ))}
         </div>
+
+        {/* Password Change Section */}
+        <Card className="p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-full bg-brand-purple/10 flex items-center justify-center">
+              <Lock className="w-5 h-5 text-brand-purple" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold">Modifier le mot de passe</h3>
+              <p className="text-sm text-gray-500">Sécurisez votre compte avec un nouveau mot de passe</p>
+            </div>
+          </div>
+
+          {passwordMessage && (
+            <div className={`mb-4 p-3 rounded-lg flex items-center gap-2 ${
+              passwordMessage.type === 'success' 
+                ? 'bg-green-50 text-green-700 border border-green-200' 
+                : 'bg-red-50 text-red-700 border border-red-200'
+            }`}>
+              {passwordMessage.type === 'success' ? (
+                <Check className="w-5 h-5" />
+              ) : (
+                <AlertCircle className="w-5 h-5" />
+              )}
+              {passwordMessage.text}
+            </div>
+          )}
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Nouveau mot de passe</label>
+              <div className="relative">
+                <Input
+                  type={showNewPassword ? 'text' : 'password'}
+                  value={passwordData.newPassword}
+                  onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                  placeholder="Minimum 6 caractères"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Confirmer le nouveau mot de passe</label>
+              <div className="relative">
+                <Input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={passwordData.confirmPassword}
+                  onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                  placeholder="Retapez le mot de passe"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handlePasswordChange}
+              disabled={passwordLoading || !passwordData.newPassword || !passwordData.confirmPassword}
+              className="w-full sm:w-auto"
+            >
+              {passwordLoading ? 'Modification...' : 'Changer le mot de passe'}
+            </Button>
+          </div>
+        </Card>
 
 
         <div className="sticky bottom-6 mx-auto max-w-md bg-white/90 backdrop-blur-md p-2 border border-gray-200 shadow-2xl rounded-full flex justify-center gap-2 mt-12 z-20">
