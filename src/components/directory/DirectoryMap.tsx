@@ -20,8 +20,13 @@ const createPulsingIcon = (count: number) => {
     });
 };
 
+// Interface pour le cluster (évite la dépendance sur @types/leaflet.markercluster)
+interface MarkerCluster {
+    getChildCount(): number;
+}
+
 // Création d'une icône de cluster personnalisée
-const createClusterCustomIcon = (cluster: L.MarkerCluster) => {
+const createClusterCustomIcon = (cluster: MarkerCluster) => {
     const count = cluster.getChildCount();
     let size = 'small';
     let dimension = 40;
