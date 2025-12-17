@@ -63,3 +63,37 @@ export interface Job {
   poster_id: string;
   poster?: Profile;
 }
+
+export interface Discussion {
+  id: string;
+  created_at: string;
+  title: string;
+  content: string;
+  author_id: string;
+  author?: Profile;
+  is_closed: boolean;
+  replies_count?: number;
+}
+
+export interface Reply {
+  id: string;
+  created_at: string;
+  content: string;
+  discussion_id: string;
+  author_id: string;
+  author?: Profile;
+}
+
+export interface Notification {
+  id: string;
+  created_at: string;
+  user_id: string;
+  type: 'discussion_reply';
+  title: string;
+  message: string;
+  link: string;
+  is_read: boolean;
+  discussion_id?: string;
+  triggered_by_id?: string;
+  triggered_by?: Profile;
+}

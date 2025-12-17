@@ -20,10 +20,15 @@ export function MemberCard({ profile }: MemberCardProps) {
         className="mb-4"
       />
       
-      <div className="mb-1">
-          <Badge variant="neutral" className="mb-2">
+      <div className="flex flex-wrap justify-center gap-2 mb-2">
+          <Badge variant="neutral">
             Promo {profile.promotion}
           </Badge>
+          {profile.study_track && (
+            <Badge variant="success">
+              {profile.study_track}
+            </Badge>
+          )}
       </div>
       
       <h3 className="text-lg font-bold text-brand-black mb-1">

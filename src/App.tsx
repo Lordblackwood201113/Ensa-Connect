@@ -7,6 +7,7 @@ import Directory from './pages/Directory';
 import Promo from './pages/Promo';
 import Events from './pages/Events';
 import Jobs from './pages/Jobs';
+import Discussions from './pages/Discussions';
 import ProfileView from './pages/ProfileView';
 import EditProfile from './pages/EditProfile';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -38,6 +39,11 @@ function App() {
             <Route path="/jobs" element={
               <DashboardLayout>
                 <Jobs />
+              </DashboardLayout>
+            } />
+            <Route path="/discussions" element={
+              <DashboardLayout>
+                <Discussions />
               </DashboardLayout>
             } />
             <Route path="/member/:id" element={

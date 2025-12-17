@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Users, GraduationCap, Calendar, Briefcase, LogOut, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Users, GraduationCap, Calendar, Briefcase, MessageCircle, LogOut, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { supabase } from '../../lib/supabase';
 
@@ -17,6 +17,7 @@ export function Sidebar({ isCollapsed, toggleSidebar, isMobileOpen = false, clos
     { icon: GraduationCap, label: 'Ma Promo', path: '/promo' },
     { icon: Calendar, label: 'Événements', path: '/events' },
     { icon: Briefcase, label: 'Jobs', path: '/jobs' },
+    { icon: MessageCircle, label: 'Discussions', path: '/discussions' },
   ];
 
   const handleLogout = async () => {

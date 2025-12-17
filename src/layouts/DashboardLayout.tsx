@@ -2,6 +2,7 @@ import { type ReactNode, useState, useEffect, useRef } from 'react';
 import { Sidebar } from '../components/layout/Sidebar';
 import { Avatar } from '../components/ui/Avatar';
 import { Input } from '../components/ui/Input';
+import { NotificationDropdown } from '../components/notifications/NotificationDropdown';
 import { useAuth } from '../context/AuthContext';
 import { Search, Menu } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -157,10 +158,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             )}
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 lg:gap-4">
+            <NotificationDropdown />
+            
             <div 
               onClick={() => profile?.id && navigate(`/member/${profile.id}`)}
-              className="flex items-center gap-3 pl-4 lg:border-l border-gray-200 cursor-pointer hover:opacity-80 transition-opacity"
+              className="flex items-center gap-3 pl-2 lg:pl-4 lg:border-l border-gray-200 cursor-pointer hover:opacity-80 transition-opacity"
             >
               <div className="text-right hidden md:block">
                 <p className="text-sm font-semibold text-brand-black">

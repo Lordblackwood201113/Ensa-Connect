@@ -9,12 +9,9 @@ import { ArrowRight, CheckCircle2 } from 'lucide-react';
 export default function Login() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -23,48 +20,17 @@ export default function Login() {
     }
   }, [user, navigate]);
 
-  const handleOAuthLogin = async (provider: 'google') => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}`,
-          scopes: 'email profile openid',
-        },
-      });
-      if (error) throw error;
-    } catch (err: any) {
-      setError(err.message);
-    }
-  };
-
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
     try {
-      if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              first_name: firstName,
-              last_name: lastName,
-              full_name: `${firstName} ${lastName}`.trim(),
-            }
-          }
-        });
-        if (error) throw error;
-        alert('Inscription réussie ! Vérifiez vos emails pour confirmer.');
-      }
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
     } catch (err: any) {
       let errorMessage = err.message;
       if (errorMessage === 'Invalid login credentials') {
@@ -139,10 +105,10 @@ export default function Login() {
         <div className="w-full max-w-md bg-white p-8 sm:p-10 rounded-[24px] shadow-xl shadow-brand-black/5 border border-white relative z-10">
             <div className="mb-10 text-center">
                 <h2 className="text-3xl font-bold text-brand-black mb-3 tracking-tight">
-                    {isLogin ? 'Bon retour 👋' : 'Créer un compte'}
+                    Connexion
                 </h2>
                 <p className="text-gray-500 text-lg">
-                    {isLogin ? 'Accédez à votre espace personnel' : 'Rejoignez la communauté ENSA Connect'}
+                    Accédez à votre espace personnel
                 </p>
             </div>
 
@@ -154,33 +120,8 @@ export default function Login() {
                     </div>
                 )}
 
-                {!isLogin && (
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label className="text-sm font-semibold text-gray-700 ml-1">Prénom</label>
-                            <Input 
-                                required
-                                placeholder="Jean" 
-                                value={firstName}
-                                onChange={(e) => setFirstName(e.target.value)}
-                                className="bg-gray-50 border-gray-100 focus:bg-white focus:border-brand-lime/50 rounded-xl h-12"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-semibold text-gray-700 ml-1">Nom</label>
-                            <Input 
-                                required
-                                placeholder="Dupont" 
-                                value={lastName}
-                                onChange={(e) => setLastName(e.target.value)}
-                                className="bg-gray-50 border-gray-100 focus:bg-white focus:border-brand-lime/50 rounded-xl h-12"
-                            />
-                        </div>
-                    </div>
-                )}
-
                 <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700 ml-1">Email professionnel</label>
+                    <label className="text-sm font-semibold text-gray-700 ml-1">Email</label>
                     <Input 
                         type="email"
                         required
@@ -192,10 +133,7 @@ export default function Login() {
                 </div>
 
                 <div className="space-y-2">
-                    <div className="flex justify-between items-center ml-1">
-                        <label className="text-sm font-semibold text-gray-700">Mot de passe</label>
-                        {isLogin && <a href="#" className="text-xs font-medium text-gray-500 hover:text-brand-black hover:underline transition-colors">Mot de passe oublié ?</a>}
-                    </div>
+                    <label className="text-sm font-semibold text-gray-700 ml-1">Mot de passe</label>
                     <Input 
                         type="password"
                         required
@@ -207,42 +145,10 @@ export default function Login() {
                 </div>
 
                 <Button type="submit" className="w-full h-14 text-lg font-bold shadow-xl shadow-brand-black/10 hover:shadow-2xl hover:shadow-brand-lime/20" disabled={loading}>
-                    {loading ? 'Chargement...' : (isLogin ? 'Se connecter' : "S'inscrire")}
+                    {loading ? 'Chargement...' : 'Se connecter'}
                     {!loading && <ArrowRight className="w-5 h-5 ml-2" />}
                 </Button>
             </form>
-
-            <div className="relative my-8">
-                <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-100"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-white text-gray-400 font-medium">Ou continuer avec</span>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4">
-                <Button 
-                    variant="outline"
-                    onClick={() => handleOAuthLogin('google')}
-                    className="w-full h-14 text-base font-semibold group"
-                >
-                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-6 h-6 group-hover:scale-110 transition-transform mr-2" />
-                    Continuer avec Google
-                </Button>
-            </div>
-
-            <div className="mt-10 text-center">
-                <p className="text-gray-500">
-                    {isLogin ? "Vous n'avez pas de compte ?" : "Vous avez déjà un compte ?"}
-                    <button 
-                        onClick={() => setIsLogin(!isLogin)}
-                        className="ml-2 font-bold text-brand-black hover:text-brand-purple transition-colors hover:underline decoration-2 underline-offset-4"
-                    >
-                        {isLogin ? "Créer un compte" : "Se connecter"}
-                    </button>
-                </p>
-            </div>
         </div>
       </div>
     </div>
