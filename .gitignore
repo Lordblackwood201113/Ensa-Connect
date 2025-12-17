@@ -75,7 +75,6 @@ GUIDE_IMPORT_USERS.md
 *.sw?
 
 # Local
-nginx.conf
 
 # Design files
 design.json
