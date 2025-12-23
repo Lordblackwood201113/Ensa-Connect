@@ -65,8 +65,30 @@ export default function ProfileView() {
     }
   };
 
-  if (loading) return <div className="text-center py-10">Chargement...</div>;
-  if (!profile) return <div className="text-center py-10">Profil non trouvé</div>;
+  if (loading) return (
+    <div className="max-w-4xl mx-auto px-4 sm:px-0">
+      <div className="animate-pulse">
+        <div className="h-32 sm:h-48 bg-gray-200 rounded-t-2xl" />
+        <div className="bg-white rounded-b-2xl p-4 sm:p-8">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gray-200 -mt-16 sm:-mt-20 border-4 border-white" />
+            <div className="flex-1 space-y-3">
+              <div className="h-6 bg-gray-200 rounded w-3/4" />
+              <div className="h-4 bg-gray-200 rounded w-1/2" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+  if (!profile) return (
+    <div className="text-center py-10 px-4">
+      <p className="text-gray-500">Profil non trouvé</p>
+      <Link to="/dashboard" className="text-brand-purple mt-2 inline-block">
+        Retour à l'annuaire
+      </Link>
+    </div>
+  );
 
   const isOwnProfile = user?.id === profile.id;
 
@@ -76,14 +98,19 @@ export default function ProfileView() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto pb-10">
-      <Link to="/dashboard" className="inline-flex items-center text-gray-500 hover:text-brand-black mb-6">
+    <div className="max-w-4xl mx-auto pb-10 px-4 sm:px-0">
+      {/* Mobile: bouton retour flottant, Desktop: lien classique */}
+      <Link
+        to="/dashboard"
+        className="hidden sm:inline-flex items-center text-gray-500 hover:text-brand-black mb-6"
+      >
         <ArrowLeft className="w-4 h-4 mr-2" />
         Retour à l'annuaire
       </Link>
 
       <Card className="overflow-hidden p-0 mb-6">
-        <div className="h-48 bg-gray-200 w-full relative">
+        {/* Cover image - plus petite sur mobile */}
+        <div className="h-32 sm:h-48 bg-gray-200 w-full relative">
             {profile.cover_url ? (
                 <img src={profile.cover_url} alt="Cover" className="w-full h-full object-cover" />
             ) : (
@@ -91,37 +118,46 @@ export default function ProfileView() {
                     <div className="w-full h-full bg-gradient-to-r from-brand-lime to-brand-purple opacity-20"></div>
                 </div>
             )}
+            {/* Mobile back button over cover */}
+            <Link
+              to="/dashboard"
+              className="sm:hidden absolute top-3 left-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-700" />
+            </Link>
         </div>
-        
-        <div className="px-4 lg:px-8 pb-8 relative">
-            <div className="absolute -top-16 left-4 lg:left-8">
-                <Avatar 
-                    src={profile.avatar_url || undefined} 
-                    alt={`${profile.first_name} ${profile.last_name}`} 
-                    size="xl" 
-                    className="w-32 h-32 border-4 border-white bg-white"
+
+        <div className="px-4 sm:px-8 pb-6 sm:pb-8 relative">
+            {/* Avatar - plus petit sur mobile */}
+            <div className="absolute -top-12 sm:-top-16 left-4 sm:left-8">
+                <Avatar
+                    src={profile.avatar_url || undefined}
+                    alt={`${profile.first_name} ${profile.last_name}`}
+                    size="xl"
+                    className="w-24 h-24 sm:w-32 sm:h-32 border-4 border-white bg-white"
                 />
             </div>
-            
-            <div className="flex flex-col sm:flex-row justify-end pt-20 sm:pt-4 mb-4 gap-4 sm:gap-0">
+
+            {/* Actions - positionnées à droite sur desktop */}
+            <div className="flex flex-col sm:flex-row justify-end pt-14 sm:pt-4 mb-4 gap-2 sm:gap-0">
                 {isOwnProfile ? (
                    <Link to="/profile/edit" className="w-full sm:w-auto">
                      <Button variant="outline" className="w-full sm:w-auto">Modifier mon profil</Button>
                    </Link>
                 ) : (
-                   <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                   <div className="flex flex-row gap-2 w-full sm:w-auto">
                      {profile.linkedin_url && (
-                       <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer">
-                         <Button variant="outline" className="gap-2">
+                       <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer" className="flex-1 sm:flex-initial">
+                         <Button variant="outline" className="gap-2 w-full sm:w-auto">
                            <Linkedin className="w-4 h-4" />
-                           LinkedIn
+                           <span className="hidden sm:inline">LinkedIn</span>
                          </Button>
                        </a>
                      )}
                      {profile.email && (
-                        <Button 
-                            variant="primary" 
-                            className="gap-2 min-w-[140px]"
+                        <Button
+                            variant="primary"
+                            className="gap-2 flex-1 sm:flex-initial sm:min-w-[140px]"
                             onClick={() => {
                                 if (profile.email) {
                                     navigator.clipboard.writeText(profile.email);
@@ -132,12 +168,12 @@ export default function ProfileView() {
                            {copiedEmail ? (
                                <>
                                    <Check className="w-4 h-4" />
-                                   Email copié !
+                                   <span className="sm:inline">Copié !</span>
                                </>
                            ) : (
                                <>
                                    <Copy className="w-4 h-4" />
-                                   Copier l'email
+                                   <span className="sm:inline">Email</span>
                                </>
                            )}
                         </Button>
@@ -146,90 +182,94 @@ export default function ProfileView() {
                 )}
             </div>
 
-            <div className="mt-8">
-                <h1 className="text-3xl font-bold text-brand-black mb-1">
+            <div className="mt-4 sm:mt-8">
+                <h1 className="text-2xl sm:text-3xl font-bold text-brand-black mb-1">
                     {profile.first_name} {profile.last_name}
                 </h1>
-                <p className="text-lg text-gray-600 mb-4">
+                <p className="text-base sm:text-lg text-gray-600 mb-3 sm:mb-4">
                     {profile.job_title} {profile.company ? `@ ${profile.company}` : ''}
                 </p>
 
-                <div className="flex flex-wrap gap-4 text-sm text-gray-500 mb-6">
-                    <div className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4" />
-                        {profile.city || 'Ville non renseignée'}
+                {/* Info chips - scrollable on mobile */}
+                <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6">
+                    <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 sm:bg-transparent sm:px-0 sm:py-0 rounded-full">
+                        <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="truncate max-w-[100px] sm:max-w-none">{profile.city || 'Ville ?'}</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                        <GraduationCap className="w-4 h-4" />
-                        Promo {profile.promotion || '?'}
+                    <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 sm:bg-transparent sm:px-0 sm:py-0 rounded-full">
+                        <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        {profile.promotion || 'Promo ?'}
                     </div>
                     {(profile.phone && (profile.is_phone_visible || isOwnProfile)) && (
-                        <div className="flex items-center gap-1">
-                             <Phone className="w-4 h-4" />
+                        <a
+                            href={`tel:${profile.phone}`}
+                            className="flex items-center gap-1 bg-gray-50 px-2 py-1 sm:bg-transparent sm:px-0 sm:py-0 rounded-full hover:text-brand-purple"
+                        >
+                             <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                              {profile.phone}
-                        </div>
+                        </a>
                     )}
                     {profile.study_track && (
-                        <div className="flex items-center gap-1">
-                             <Building className="w-4 h-4" />
-                             {profile.study_track}
+                        <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 sm:bg-transparent sm:px-0 sm:py-0 rounded-full">
+                             <Building className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                             <span className="truncate max-w-[120px] sm:max-w-none">{profile.study_track}</span>
                         </div>
                     )}
                 </div>
 
-                <div className="border-b border-gray-200 mb-8">
+                <div className="border-b border-gray-200 mb-6 sm:mb-8">
                     <div className="flex gap-8">
-                        <button className="pb-3 border-b-2 border-brand-black font-semibold text-brand-black">Profil</button>
+                        <button className="pb-3 border-b-2 border-brand-black font-semibold text-brand-black text-sm sm:text-base">Profil</button>
                     </div>
                 </div>
 
-                <div className="grid gap-8">
-                    
+                <div className="grid gap-6 sm:gap-8">
+
                     {/* Experiences */}
                     <section>
-                        <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                            <Briefcase className="w-5 h-5 text-brand-purple" />
+                        <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
+                            <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-brand-purple" />
                             Parcours professionnel
                         </h3>
                         {experiences.length > 0 ? (
-                            <div className="space-y-6 ml-2 border-l-2 border-gray-100 pl-8 relative">
+                            <div className="space-y-4 sm:space-y-6 ml-1 sm:ml-2 border-l-2 border-gray-100 pl-4 sm:pl-8 relative">
                                 {experiences.map((exp) => (
                                     <div key={exp.id} className="relative">
-                                        <div className="absolute -left-[39px] top-1 w-5 h-5 rounded-full border-4 border-white bg-brand-purple"></div>
-                                        <h4 className="font-bold text-lg">{exp.title}</h4>
-                                        <p className="text-gray-700 font-medium">{exp.company}</p>
-                                        <p className="text-sm text-gray-400 mt-1">
+                                        <div className="absolute -left-[21px] sm:-left-[39px] top-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full border-4 border-white bg-brand-purple"></div>
+                                        <h4 className="font-bold text-base sm:text-lg">{exp.title}</h4>
+                                        <p className="text-gray-700 font-medium text-sm sm:text-base">{exp.company}</p>
+                                        <p className="text-xs sm:text-sm text-gray-400 mt-1">
                                             {formatDate(exp.start_date)} - {exp.end_date ? formatDate(exp.end_date) : 'Présent'}
                                         </p>
                                     </div>
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-gray-400 italic">Aucune expérience ajoutée.</p>
+                            <p className="text-gray-400 italic text-sm sm:text-base">Aucune expérience ajoutée.</p>
                         )}
                     </section>
 
                     {/* Educations */}
                     <section>
-                        <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                            <GraduationCap className="w-5 h-5 text-brand-lime" />
+                        <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
+                            <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 text-brand-lime" />
                             Formation académique
                         </h3>
                         {educations.length > 0 ? (
-                            <div className="space-y-6 ml-2 border-l-2 border-gray-100 pl-8 relative">
+                            <div className="space-y-4 sm:space-y-6 ml-1 sm:ml-2 border-l-2 border-gray-100 pl-4 sm:pl-8 relative">
                                 {educations.map((edu) => (
                                     <div key={edu.id} className="relative">
-                                        <div className="absolute -left-[39px] top-1 w-5 h-5 rounded-full border-4 border-white bg-brand-lime"></div>
-                                        <h4 className="font-bold text-lg">{edu.school}</h4>
-                                        <p className="text-gray-700">{edu.degree} {edu.field_of_study ? `• ${edu.field_of_study}` : ''}</p>
-                                        <p className="text-sm text-gray-400 mt-1">
+                                        <div className="absolute -left-[21px] sm:-left-[39px] top-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full border-4 border-white bg-brand-lime"></div>
+                                        <h4 className="font-bold text-base sm:text-lg">{edu.school}</h4>
+                                        <p className="text-gray-700 text-sm sm:text-base">{edu.degree} {edu.field_of_study ? `• ${edu.field_of_study}` : ''}</p>
+                                        <p className="text-xs sm:text-sm text-gray-400 mt-1">
                                             {edu.start_date ? `${edu.start_date} - ` : ''}{edu.end_date || 'Présent'}
                                         </p>
                                     </div>
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-gray-400 italic">Aucune formation ajoutée.</p>
+                            <p className="text-gray-400 italic text-sm sm:text-base">Aucune formation ajoutée.</p>
                         )}
                     </section>
 

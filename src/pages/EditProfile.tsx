@@ -197,31 +197,40 @@ export default function EditProfile() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto pb-20">
-      <Button 
-        variant="ghost" 
-        className="mb-4 pl-0 hover:bg-transparent" 
+    <div className="max-w-4xl mx-auto pb-24 sm:pb-20 px-4 sm:px-0">
+      {/* Desktop back button */}
+      <Button
+        variant="ghost"
+        className="hidden sm:flex mb-4 pl-0 hover:bg-transparent"
         onClick={() => navigate(-1)}
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
         Retour au profil
       </Button>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        
+      <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
+
         {/* Images Section */}
         <Card className="p-0 overflow-hidden">
-            <div className="relative h-48 bg-gray-100 group">
+            <div className="relative h-32 sm:h-48 bg-gray-100 group">
                 {formData.cover_url ? (
                      <img src={formData.cover_url} className="w-full h-full object-cover" alt="Cover" />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                    <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm sm:text-base">
                         Ajouter une bannière
                     </div>
                 )}
-                <div className="absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                     <ImageUpload 
-                        url={formData.cover_url} 
+                {/* Mobile back button */}
+                <button
+                  type="button"
+                  onClick={() => navigate(-1)}
+                  className="sm:hidden absolute top-3 left-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm"
+                >
+                  <ArrowLeft className="w-5 h-5 text-gray-700" />
+                </button>
+                <div className="absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 sm:transition-opacity">
+                     <ImageUpload
+                        url={formData.cover_url}
                         onUpload={(url) => setFormData(prev => ({ ...prev, cover_url: url }))}
                         aspectRatio="video"
                         label="Modifier la bannière"
@@ -229,18 +238,18 @@ export default function EditProfile() {
                      />
                 </div>
             </div>
-            <div className="px-8 relative">
-                 <div className="absolute -top-16 left-8">
+            <div className="px-4 sm:px-8 relative">
+                 <div className="absolute -top-12 sm:-top-16 left-4 sm:left-8">
                      <div className="relative">
-                        <ImageUpload 
-                            url={formData.avatar_url} 
+                        <ImageUpload
+                            url={formData.avatar_url}
                             onUpload={(url) => setFormData(prev => ({ ...prev, avatar_url: url }))}
                             aspectRatio="square"
-                            className="w-32 h-32 rounded-full border-4 border-white shadow-md overflow-hidden"
+                            className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-white shadow-md overflow-hidden"
                         />
                      </div>
                  </div>
-                    <div className="pt-20 pb-8">
+                    <div className="pt-14 sm:pt-20 pb-6 sm:pb-8">
                      <h2 className="text-xl font-bold mb-4">Informations personnelles</h2>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
@@ -267,7 +276,7 @@ export default function EditProfile() {
                                     type="number"
                                     min="1"
                                     max="70"
-                                    className="w-full bg-white border border-gray-200 rounded-xl py-2.5 pl-16 pr-4 focus:outline-none focus:ring-2 focus:ring-brand-purple"
+                                    className="w-full bg-white border border-gray-200 rounded-xl py-3 sm:py-2.5 pl-16 pr-4 text-[16px] focus:outline-none focus:ring-2 focus:ring-brand-purple touch-manipulation"
                                     placeholder="53"
                                     value={formData.promotion ? formData.promotion.replace('ENSA ', '') : ''}
                                     onChange={(e) => {
@@ -284,7 +293,7 @@ export default function EditProfile() {
                         <div>
                             <label className="block text-sm font-medium mb-2">Filière</label>
                             <select
-                                className="w-full bg-white border border-gray-200 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-brand-purple"
+                                className="w-full bg-white border border-gray-200 rounded-xl min-h-[48px] py-3 sm:py-2.5 px-4 text-[16px] focus:outline-none focus:ring-2 focus:ring-brand-purple touch-manipulation appearance-none leading-tight"
                                 value={formData.study_track}
                                 onChange={(e) => setFormData({ ...formData, study_track: e.target.value })}
                             >
@@ -315,7 +324,7 @@ export default function EditProfile() {
                                     types: ["(cities)"],
                                 }}
                                 placeholder="Rechercher une ville..."
-                                className="w-full bg-white border border-gray-200 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-brand-purple"
+                                className="w-full bg-white border border-gray-200 rounded-xl py-3 sm:py-2.5 px-4 text-[16px] focus:outline-none focus:ring-2 focus:ring-brand-purple touch-manipulation"
                                 defaultValue={formData.city}
                                 onChange={(e: any) => setFormData({ ...formData, city: e.target.value })}
                             />
@@ -591,21 +600,22 @@ export default function EditProfile() {
         </Card>
 
 
-        <div className="sticky bottom-6 mx-auto max-w-md bg-white/90 backdrop-blur-md p-2 border border-gray-200 shadow-2xl rounded-full flex justify-center gap-2 mt-12 z-20">
-            <Button 
-                type="button" 
-                variant="ghost" 
+        {/* Sticky action bar - full width on mobile */}
+        <div className="fixed sm:sticky bottom-0 sm:bottom-6 left-0 right-0 sm:left-auto sm:right-auto sm:mx-auto sm:max-w-md bg-white/95 sm:bg-white/90 backdrop-blur-md p-3 sm:p-2 border-t sm:border border-gray-200 sm:shadow-2xl sm:rounded-full flex justify-center gap-2 sm:mt-12 z-20 safe-area-bottom">
+            <Button
+                type="button"
+                variant="ghost"
                 onClick={() => navigate(-1)}
-                className="rounded-full px-6 hover:bg-gray-100 cursor-pointer text-gray-600"
+                className="flex-1 sm:flex-initial sm:rounded-full sm:px-6 hover:bg-gray-100 cursor-pointer text-gray-600"
             >
                 Annuler
             </Button>
-            <Button 
-                type="submit" 
+            <Button
+                type="submit"
                 disabled={loading}
-                className="rounded-full px-8 bg-brand-black text-white hover:bg-gray-800 cursor-pointer shadow-none"
+                className="flex-1 sm:flex-initial sm:rounded-full sm:px-8 bg-brand-black text-white hover:bg-gray-800 cursor-pointer shadow-none"
             >
-                {loading ? '...' : 'Enregistrer tout'}
+                {loading ? '...' : 'Enregistrer'}
             </Button>
         </div>
       </form>

@@ -1,12 +1,15 @@
-import { useState, useEffect } from 'react';
-import { X, Send, CheckCircle2, Clock, Lock, Trash2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Send, CheckCircle2, Clock, Lock, Trash2, MessageCircle } from 'lucide-react';
+import { Modal } from '../ui/Modal';
 import { supabase } from '../../lib/supabase';
 import { Avatar } from '../ui/Avatar';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
+import { Input } from '../ui/Input';
 import { useAuth } from '../../context/AuthContext';
 import type { Discussion, Reply } from '../../types';
 import { formatDistanceToNow } from '../../lib/utils';
+import { Link } from 'react-router-dom';
 
 interface DiscussionDetailModalProps {
   discussion: Discussion | null;
@@ -21,12 +24,20 @@ export function DiscussionDetailModal({ discussion, isOpen, onClose, onUpdate }:
   const [newReply, setNewReply] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingReplies, setLoadingReplies] = useState(false);
+  const repliesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (discussion && isOpen) {
       fetchReplies();
     }
   }, [discussion, isOpen]);
+
+  // Scroll to bottom when new replies are added
+  useEffect(() => {
+    if (replies.length > 0) {
+      repliesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [replies.length]);
 
   const fetchReplies = async () => {
     if (!discussion) return;
@@ -67,7 +78,6 @@ export function DiscussionDetailModal({ discussion, isOpen, onClose, onUpdate }:
 
       if (error) throw error;
 
-      // Créer des notifications pour tous les participants
       await createNotificationsForParticipants();
 
       setNewReply('');
@@ -85,27 +95,18 @@ export function DiscussionDetailModal({ discussion, isOpen, onClose, onUpdate }:
     if (!user || !discussion) return;
 
     try {
-      // Récupérer tous les participants uniques (auteur + personnes ayant répondu)
       const { data: existingReplies } = await supabase
         .from('replies')
         .select('author_id')
         .eq('discussion_id', discussion.id);
 
-      // Collecter les IDs uniques des participants
       const participantIds = new Set<string>();
-      
-      // Ajouter l'auteur de la discussion
       participantIds.add(discussion.author_id);
-      
-      // Ajouter les auteurs des réponses
       existingReplies?.forEach(reply => {
         participantIds.add(reply.author_id);
       });
-
-      // Retirer l'utilisateur actuel (celui qui poste la réponse)
       participantIds.delete(user.id);
 
-      // Créer une notification pour chaque participant
       const notifications = Array.from(participantIds).map(userId => ({
         user_id: userId,
         type: 'discussion_reply',
@@ -118,13 +119,7 @@ export function DiscussionDetailModal({ discussion, isOpen, onClose, onUpdate }:
       }));
 
       if (notifications.length > 0) {
-        const { error } = await supabase
-          .from('notifications')
-          .insert(notifications);
-
-        if (error) {
-          console.error('Error creating notifications:', error);
-        }
+        await supabase.from('notifications').insert(notifications);
       }
     } catch (error) {
       console.error('Error creating notifications:', error);
@@ -171,119 +166,135 @@ export function DiscussionDetailModal({ discussion, isOpen, onClose, onUpdate }:
     }
   };
 
-  if (!isOpen || !discussion) return null;
+  if (!discussion) return null;
 
   const isAuthor = user?.id === discussion.author_id;
   const timeAgo = formatDistanceToNow(new Date(discussion.created_at));
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-xl flex flex-col">
-        {/* Header */}
-        <div className="p-6 border-b border-gray-100 flex justify-between items-start sticky top-0 bg-white z-10">
-          <div className="flex-1 pr-4">
-            <div className="flex items-center gap-2 mb-2">
-              {discussion.is_closed ? (
-                <Badge variant="success" className="flex items-center gap-1">
-                  <CheckCircle2 className="w-3 h-3" />
-                  Résolu
-                </Badge>
-              ) : (
-                <Badge variant="neutral" className="flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  En attente
-                </Badge>
-              )}
-            </div>
-            <h2 className="text-xl font-bold text-brand-black">
-              {discussion.title}
-            </h2>
+    <Modal isOpen={isOpen} onClose={onClose} title="Discussion" size="lg">
+      <div className="flex flex-col h-full">
+        {/* Main Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+          {/* Question Header */}
+          <div className="flex items-center gap-2 mb-3">
+            {discussion.is_closed ? (
+              <Badge variant="success" className="flex items-center gap-1 text-xs">
+                <CheckCircle2 className="w-3 h-3" />
+                Résolu
+              </Badge>
+            ) : (
+              <Badge variant="neutral" className="flex items-center gap-1 text-xs">
+                <Clock className="w-3 h-3" />
+                En attente
+              </Badge>
+            )}
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-            <X className="w-6 h-6" />
-          </button>
-        </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+          <h2 className="text-lg sm:text-xl font-bold text-brand-black mb-4">
+            {discussion.title}
+          </h2>
+
           {/* Original Question */}
-          <div className="bg-gray-50 rounded-xl p-5 mb-6">
-            <div className="flex items-center gap-3 mb-4">
+          <div className="bg-gray-50 rounded-xl p-4 sm:p-5 mb-6">
+            <Link 
+              to={`/member/${discussion.author?.id}`}
+              onClick={onClose}
+              className="flex items-center gap-3 mb-3 hover:opacity-80 transition-opacity"
+            >
               <Avatar 
                 src={discussion.author?.avatar_url || undefined} 
                 alt={discussion.author?.first_name || 'Auteur'} 
-                size="md" 
+                size="sm"
+                className="w-9 h-9 sm:w-10 sm:h-10"
               />
               <div>
-                <p className="font-semibold text-brand-black">
+                <p className="font-semibold text-brand-black text-sm sm:text-base">
                   {discussion.author?.first_name} {discussion.author?.last_name}
                 </p>
                 <p className="text-xs text-gray-500">{timeAgo}</p>
               </div>
-            </div>
-            <p className="text-gray-700 whitespace-pre-line leading-relaxed">
+            </Link>
+            <p className="text-sm sm:text-base text-gray-700 whitespace-pre-line leading-relaxed">
               {discussion.content}
             </p>
           </div>
 
           {/* Replies Section */}
-          <div className="mb-6">
-            <h3 className="font-semibold text-gray-700 mb-4">
-              {replies.length} réponse{replies.length > 1 ? 's' : ''}
+          <div>
+            <h3 className="font-semibold text-gray-700 mb-4 flex items-center gap-2">
+              <MessageCircle className="w-4 h-4" />
+              {replies.length} réponse{replies.length !== 1 ? 's' : ''}
             </h3>
 
             {loadingReplies ? (
-              <div className="text-center py-8 text-gray-500">Chargement...</div>
+              <div className="space-y-3">
+                {[1, 2].map(i => (
+                  <div key={i} className="bg-gray-100 rounded-xl p-4 animate-pulse h-24" />
+                ))}
+              </div>
             ) : replies.length === 0 ? (
               <div className="text-center py-8 text-gray-400">
-                Aucune réponse pour le moment. Soyez le premier à répondre !
+                <MessageCircle className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                <p>Aucune réponse pour le moment</p>
+                <p className="text-sm">Soyez le premier à répondre !</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {replies.map((reply) => (
-                  <div key={reply.id} className="bg-white border border-gray-100 rounded-xl p-4">
-                    <div className="flex items-center gap-3 mb-3">
+                  <div key={reply.id} className="bg-white border border-gray-100 rounded-xl p-3 sm:p-4">
+                    <Link 
+                      to={`/member/${reply.author?.id}`}
+                      onClick={onClose}
+                      className="flex items-center gap-2 sm:gap-3 mb-2 hover:opacity-80 transition-opacity"
+                    >
                       <Avatar 
                         src={reply.author?.avatar_url || undefined} 
                         alt={reply.author?.first_name || 'Auteur'} 
-                        size="sm" 
+                        size="sm"
+                        className="w-7 h-7 sm:w-8 sm:h-8"
                       />
-                      <div>
-                        <p className="font-medium text-brand-black text-sm">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-brand-black text-sm truncate">
                           {reply.author?.first_name} {reply.author?.last_name}
                         </p>
-                        <p className="text-xs text-gray-400">
+                        <p className="text-[10px] sm:text-xs text-gray-400">
                           {formatDistanceToNow(new Date(reply.created_at))}
                         </p>
                       </div>
-                    </div>
-                    <p className="text-gray-600 text-sm whitespace-pre-line leading-relaxed pl-11">
+                    </Link>
+                    <p className="text-gray-600 text-sm whitespace-pre-line leading-relaxed ml-9 sm:ml-11">
                       {reply.content}
                     </p>
                   </div>
                 ))}
+                <div ref={repliesEndRef} />
               </div>
             )}
           </div>
         </div>
 
         {/* Footer - Reply Form or Closed Message */}
-        <div className="border-t border-gray-100 p-4 bg-gray-50">
+        <div className="border-t border-gray-100 p-3 sm:p-4 bg-white shrink-0">
           {discussion.is_closed ? (
             <div className="flex items-center justify-center gap-2 text-gray-500 py-2">
               <Lock className="w-4 h-4" />
-              <span>Cette discussion est fermée</span>
+              <span className="text-sm">Cette discussion est fermée</span>
             </div>
           ) : (
-            <form onSubmit={handleSubmitReply} className="flex gap-3">
-              <input
+            <form onSubmit={handleSubmitReply} className="flex gap-2 sm:gap-3">
+              <Input
                 type="text"
                 value={newReply}
                 onChange={(e) => setNewReply(e.target.value)}
                 placeholder="Écrire une réponse..."
-                className="flex-1 bg-white border border-gray-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-brand-purple"
+                className="flex-1"
               />
-              <Button type="submit" disabled={loading || !newReply.trim()}>
+              <Button 
+                type="submit" 
+                disabled={loading || !newReply.trim()}
+                className="shrink-0 px-4"
+              >
                 <Send className="w-4 h-4" />
               </Button>
             </form>
@@ -295,25 +306,27 @@ export function DiscussionDetailModal({ discussion, isOpen, onClose, onUpdate }:
               {!discussion.is_closed && (
                 <Button 
                   variant="ghost" 
+                  size="sm"
                   className="flex-1 text-green-600 hover:bg-green-50"
                   onClick={handleCloseDiscussion}
                 >
-                  <CheckCircle2 className="w-4 h-4 mr-2" />
-                  Marquer comme résolu
+                  <CheckCircle2 className="w-4 h-4 mr-1.5" />
+                  <span className="text-xs sm:text-sm">Marquer résolu</span>
                 </Button>
               )}
               <Button 
                 variant="ghost" 
+                size="sm"
                 className={`${discussion.is_closed ? 'flex-1' : ''} text-red-600 hover:bg-red-50`}
                 onClick={handleDeleteDiscussion}
               >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Supprimer
+                <Trash2 className="w-4 h-4 mr-1.5" />
+                <span className="text-xs sm:text-sm">Supprimer</span>
               </Button>
             </div>
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

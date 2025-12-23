@@ -1,6 +1,161 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
+/* ============================================
+   MOBILE-FIRST BASE STYLES
+   ============================================ */
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent horizontal scroll */
+body {
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+}
+
+/* Better touch experience */
+* {
+  -webkit-touch-callout: none;
+}
+
+/* Allow text selection */
+p, h1, h2, h3, h4, h5, h6, span, a {
+  -webkit-touch-callout: default;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Prevent iOS zoom on input focus */
+input, select, textarea {
+  font-size: 16px !important;
+}
+
+@media (min-width: 640px) {
+  input, select, textarea {
+    font-size: inherit !important;
+  }
+}
+
+/* Fix mobile select dropdown overflow */
+select {
+  max-width: 100%;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+  background-size: 1.25em 1.25em;
+  padding-right: 2.5rem;
+}
+
+/* Mobile select styling */
+@media (max-width: 639px) {
+  select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    /* Allow text to wrap to multiple lines */
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    height: auto;
+    min-height: 48px;
+    line-height: 1.4;
+  }
+
+  /* Style options for better readability */
+  select option {
+    white-space: normal;
+    word-wrap: break-word;
+    padding: 12px 16px;
+    line-height: 1.4;
+  }
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Custom thin scrollbar for desktop */
+@media (min-width: 640px) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+  }
+}
+
+/* Safe area padding for notched devices */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+/* Touch-friendly interactive elements */
+.touch-manipulation {
+  touch-action: manipulation;
+}
+
+/* Pull-to-refresh prevention on main container */
+.no-overscroll {
+  overscroll-behavior: none;
+}
+
+/* Improved focus states for accessibility */
+:focus-visible {
+  outline: 2px solid #8B5CF6;
+  outline-offset: 2px;
+}
+
+/* Disable focus ring on touch */
+@media (pointer: coarse) {
+  :focus {
+    outline: none;
+  }
+}
+
+/* Loading skeleton animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Breakpoint helper for xs screens */
+@media (min-width: 375px) {
+  .xs\:block { display: block; }
+  .xs\:hidden { display: none; }
+  .xs\:flex { display: flex; }
+}
+
 @theme {
   --color-brand-lime: #A9D18E;
   --color-brand-purple: #8B5CF6;

@@ -102,12 +102,21 @@ export default function Login() {
              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-lime/5 rounded-full blur-[100px]" />
         </div>
 
-        <div className="w-full max-w-md bg-white p-8 sm:p-10 rounded-[24px] shadow-xl shadow-brand-black/5 border border-white relative z-10">
-            <div className="mb-10 text-center">
-                <h2 className="text-3xl font-bold text-brand-black mb-3 tracking-tight">
+        <div className="w-full max-w-md bg-white p-6 sm:p-10 rounded-[24px] shadow-xl shadow-brand-black/5 border border-white relative z-10">
+            {/* Mobile Logo */}
+            <div className="lg:hidden flex flex-col items-center mb-8">
+                <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-lg shadow-brand-lime/20 mb-4 border border-gray-100">
+                    <img src="/logo.jpeg" alt="ENSA Connect" className="w-full h-full rounded-2xl object-cover" />
+                </div>
+                <span className="text-xl font-bold text-brand-black">ENSA Connect</span>
+                <p className="text-sm text-gray-500 mt-1">Réseau des alumni ENSA</p>
+            </div>
+
+            <div className="mb-8 sm:mb-10 text-center">
+                <h2 className="text-2xl sm:text-3xl font-bold text-brand-black mb-2 sm:mb-3 tracking-tight">
                     Connexion
                 </h2>
-                <p className="text-gray-500 text-lg">
+                <p className="text-gray-500 text-base sm:text-lg">
                     Accédez à votre espace personnel
                 </p>
             </div>

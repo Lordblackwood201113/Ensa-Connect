@@ -90,7 +90,7 @@ export default function Onboarding() {
             <label className="block text-sm font-medium mb-2">Filière *</label>
             <select
               required
-              className="w-full bg-white border border-gray-200 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-brand-purple"
+              className="w-full bg-white border border-gray-200 rounded-xl min-h-[48px] py-3 sm:py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-brand-purple text-[16px] touch-manipulation appearance-none leading-tight"
               value={formData.study_track}
               onChange={(e) => setFormData({ ...formData, study_track: e.target.value })}
             >

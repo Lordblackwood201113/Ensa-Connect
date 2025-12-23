@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(node scripts/generateIcons.mjs:*)",
+      "Bash(npm run build:*)",
+      "Bash(dir:*)",
+      "Bash(cat:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
