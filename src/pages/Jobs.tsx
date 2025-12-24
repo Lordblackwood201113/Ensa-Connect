@@ -194,16 +194,11 @@ export default function Jobs() {
         <div className="bg-gray-50 rounded-2xl p-8 sm:p-10 text-center">
           <Briefcase className="w-12 h-12 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-500 font-medium mb-1">Aucune offre trouvée</p>
-          <p className="text-sm text-gray-400 mb-4">
+          <p className="text-sm text-gray-400">
             {searchTerm || hasActiveFilter 
               ? 'Essayez de modifier vos filtres'
               : 'Soyez le premier à publier une offre !'}
           </p>
-          {!searchTerm && !hasActiveFilter && (
-            <Button variant="outline" onClick={() => { setJobToEdit(null); setIsCreateModalOpen(true); }}>
-              Publier une offre
-            </Button>
-          )}
         </div>
       )}
 

@@ -114,10 +114,7 @@ export default function Events() {
           <div className="bg-gray-50 rounded-2xl p-8 sm:p-10 text-center">
             <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500 font-medium mb-1">Aucun événement à venir</p>
-            <p className="text-sm text-gray-400 mb-4">Soyez le premier à en créer un !</p>
-            <Button variant="outline" onClick={() => { setEventToEdit(null); setIsCreateModalOpen(true); }}>
-              Créer un événement
-            </Button>
+            <p className="text-sm text-gray-400">Soyez le premier à en créer un !</p>
           </div>
         )}
       </section>
