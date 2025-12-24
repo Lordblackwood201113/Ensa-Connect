@@ -59,17 +59,18 @@ export function SentRequestCard({ connection, onUpdate }: SentRequestCardProps) 
           <p className="text-xs xs:text-sm text-gray-500 truncate">
             {receiver.job_title || receiver.promotion || 'Membre ENSA'}
           </p>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="inline-flex items-center gap-1 text-[10px] xs:text-xs text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">
-              <Clock className="w-3 h-3" />
-              En attente
+          <div className="flex items-center gap-1.5 xs:gap-2 mt-1 overflow-hidden">
+            <span className="inline-flex items-center gap-1 text-[10px] xs:text-xs text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full whitespace-nowrap shrink-0">
+              <Clock className="w-3 h-3 shrink-0" />
+              <span className="hidden xs:inline">En attente</span>
+              <span className="xs:hidden">Attente</span>
             </span>
-            <span className="text-[10px] xs:text-xs text-gray-400">{timeAgo}</span>
+            <span className="text-[10px] xs:text-xs text-gray-400 truncate">{timeAgo}</span>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center shrink-0 ml-1" onClick={(e) => e.stopPropagation()}>
           <button
             onClick={handleCancel}
             disabled={isLoading}
