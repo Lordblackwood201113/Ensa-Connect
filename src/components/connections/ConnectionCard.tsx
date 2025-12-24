@@ -1,0 +1,94 @@
+import { useNavigate } from 'react-router-dom';
+import { Avatar } from '../ui/Avatar';
+import { Card } from '../ui/Card';
+import { UserMinus, MapPin, Briefcase, ChevronRight } from 'lucide-react';
+import type { Profile } from '../../types';
+
+interface ConnectionCardProps {
+  profile: Profile;
+  onRemove?: () => void;
+  showActions?: boolean;
+}
+
+export function ConnectionCard({
+  profile,
+  onRemove,
+  showActions = true
+}: ConnectionCardProps) {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    navigate(`/member/${profile.id}`);
+  };
+
+  const handleRemove = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onRemove?.();
+  };
+
+  return (
+    <Card
+      className="group p-3 xs:p-4 hover:shadow-md hover:border-brand-lime/50 transition-all duration-200 active:scale-[0.99] active:bg-gray-50/50 cursor-pointer touch-manipulation overflow-hidden"
+      onClick={handleCardClick}
+    >
+      <div className="flex items-center gap-2 xs:gap-3">
+        {/* Avatar */}
+        <Avatar
+          src={profile.avatar_url || undefined}
+          alt={profile.first_name || ''}
+          size="md"
+          className="w-10 h-10 xs:w-12 xs:h-12 shrink-0"
+        />
+
+        {/* Info */}
+        <div className="flex-1 min-w-0 overflow-hidden">
+          <h3 className="font-semibold text-brand-black text-sm xs:text-base group-hover:text-brand-lime transition-colors truncate">
+            {profile.first_name} {profile.last_name}
+          </h3>
+
+          {profile.job_title ? (
+            <p className="text-xs xs:text-sm text-gray-600 truncate flex items-center gap-1 mt-0.5">
+              <Briefcase className="w-3 h-3 shrink-0 text-gray-400" />
+              <span className="truncate">
+                {profile.job_title}
+                {profile.company && (
+                  <span className="text-gray-400 hidden sm:inline"> @ {profile.company}</span>
+                )}
+              </span>
+            </p>
+          ) : profile.promotion ? (
+            <p className="text-xs xs:text-sm text-gray-500 mt-0.5 truncate">{profile.promotion}</p>
+          ) : null}
+
+          <div className="flex items-center gap-1.5 xs:gap-2 mt-1 text-[10px] xs:text-xs text-gray-500 overflow-hidden">
+            {profile.promotion && profile.job_title && (
+              <span className="bg-gray-100 px-1.5 py-0.5 rounded-full truncate max-w-[80px] xs:max-w-[100px] shrink-0">
+                {profile.promotion}
+              </span>
+            )}
+            {profile.city && (
+              <span className="flex items-center gap-0.5 truncate min-w-0">
+                <MapPin className="w-3 h-3 shrink-0" />
+                <span className="truncate">{profile.city}</span>
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Actions or Arrow */}
+        <div className="flex items-center shrink-0 ml-1">
+          {showActions && onRemove && (
+            <button
+              onClick={handleRemove}
+              className="p-1.5 xs:p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 active:bg-red-100 rounded-full transition-colors touch-manipulation"
+              title="Retirer la connexion"
+            >
+              <UserMinus className="w-4 h-4" />
+            </button>
+          )}
+          <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-brand-lime group-hover:translate-x-0.5 transition-all" />
+        </div>
+      </div>
+    </Card>
+  );
+}

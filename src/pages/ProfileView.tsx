@@ -1,21 +1,25 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import type { Profile, Experience, Education } from '../types';
 import { Avatar } from '../components/ui/Avatar';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { Linkedin, MapPin, Building, GraduationCap, ArrowLeft, Briefcase, Copy, Check, Phone } from 'lucide-react';
+import { ConnectionButton } from '../components/connections/ConnectionButton';
+import { Linkedin, MapPin, Building, GraduationCap, ArrowLeft, Briefcase, Copy, Check, Phone, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { connectionService } from '../lib/connections';
 
 export default function ProfileView() {
   const { id } = useParams();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [educations, setEducations] = useState<Education[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const [connectionsCount, setConnectionsCount] = useState(0);
 
   useEffect(() => {
     if (copiedEmail) {
@@ -57,6 +61,10 @@ export default function ProfileView() {
         .eq('user_id', userId)
         .order('start_date', { ascending: false });
       if (eduData) setEducations(eduData);
+
+      // Fetch connections count
+      const { count } = await connectionService.getConnectionsCount(userId);
+      setConnectionsCount(count);
 
     } catch (error) {
       console.error('Error fetching profile data:', error);
@@ -146,18 +154,21 @@ export default function ProfileView() {
                    </Link>
                 ) : (
                    <div className="flex flex-row gap-2 w-full sm:w-auto">
+                     {/* Bouton de connexion */}
+                     <ConnectionButton targetUserId={profile.id} size="md" />
+                     
+                     
                      {profile.linkedin_url && (
-                       <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer" className="flex-1 sm:flex-initial">
-                         <Button variant="outline" className="gap-2 w-full sm:w-auto">
+                       <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer" className="hidden sm:block">
+                         <Button variant="outline" className="gap-2">
                            <Linkedin className="w-4 h-4" />
-                           <span className="hidden sm:inline">LinkedIn</span>
                          </Button>
                        </a>
                      )}
                      {profile.email && (
                         <Button
-                            variant="primary"
-                            className="gap-2 flex-1 sm:flex-initial sm:min-w-[140px]"
+                            variant="ghost"
+                            className="gap-2 hidden sm:flex"
                             onClick={() => {
                                 if (profile.email) {
                                     navigator.clipboard.writeText(profile.email);
@@ -166,15 +177,9 @@ export default function ProfileView() {
                             }}
                         >
                            {copiedEmail ? (
-                               <>
-                                   <Check className="w-4 h-4" />
-                                   <span className="sm:inline">Copié !</span>
-                               </>
+                               <Check className="w-4 h-4 text-green-500" />
                            ) : (
-                               <>
-                                   <Copy className="w-4 h-4" />
-                                   <span className="sm:inline">Email</span>
-                               </>
+                               <Copy className="w-4 h-4" />
                            )}
                         </Button>
                      )}
@@ -215,6 +220,15 @@ export default function ProfileView() {
                              <span className="truncate max-w-[120px] sm:max-w-none">{profile.study_track}</span>
                         </div>
                     )}
+                </div>
+
+                {/* Compteur de connexions */}
+                <div className="flex items-center gap-2 mb-4 sm:mb-6">
+                  <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                    <Users className="w-4 h-4" />
+                    <span className="font-semibold">{connectionsCount}</span>
+                    <span className="text-gray-500">connexion{connectionsCount !== 1 ? 's' : ''}</span>
+                  </div>
                 </div>
 
                 <div className="border-b border-gray-200 mb-6 sm:mb-8">

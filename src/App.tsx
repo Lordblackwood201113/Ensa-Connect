@@ -8,14 +8,17 @@ import Promo from './pages/Promo';
 import Events from './pages/Events';
 import Jobs from './pages/Jobs';
 import Discussions from './pages/Discussions';
+import Connections from './pages/Connections';
 import ProfileView from './pages/ProfileView';
 import EditProfile from './pages/EditProfile';
 import ProtectedRoute from './components/ProtectedRoute';
+import { InstallPWAPrompt } from './components/pwa/InstallPWAPrompt';
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <InstallPWAPrompt />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
@@ -44,6 +47,12 @@ function App() {
             <Route path="/discussions" element={
               <DashboardLayout>
                 <Discussions />
+              </DashboardLayout>
+            } />
+
+            <Route path="/connections" element={
+              <DashboardLayout>
+                <Connections />
               </DashboardLayout>
             } />
             <Route path="/member/:id" element={

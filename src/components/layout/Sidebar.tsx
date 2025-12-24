@@ -1,7 +1,11 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Users, GraduationCap, Calendar, Briefcase, MessageCircle, LogOut, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Users, GraduationCap, Calendar, Briefcase, MessageCircle, UserPlus, LogOut, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { supabase } from '../../lib/supabase';
+import { connectionService } from '../../lib/connections';
+
+import { useAuth } from '../../context/AuthContext';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -12,12 +16,34 @@ interface SidebarProps {
 
 export function Sidebar({ isCollapsed, toggleSidebar, isMobileOpen = false, closeMobileSidebar }: SidebarProps) {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [pendingCount, setPendingCount] = useState(0);
+  
+
+  useEffect(() => {
+    if (user) {
+      loadCounts();
+      // Rafraîchir les compteurs toutes les 30 secondes
+      const interval = setInterval(loadCounts, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  const loadCounts = async () => {
+    if (!user) return;
+    
+    const pendingRes = await connectionService.getPendingCount(user.id);
+    setPendingCount(pendingRes.count);
+  };
+
   const navItems = [
     { icon: Users, label: 'Annuaire', path: '/dashboard' },
     { icon: GraduationCap, label: 'Ma Promo', path: '/promo' },
     { icon: Calendar, label: 'Événements', path: '/events' },
     { icon: Briefcase, label: 'Jobs', path: '/jobs' },
     { icon: MessageCircle, label: 'Discussions', path: '/discussions' },
+    
+    { icon: UserPlus, label: 'Connexions', path: '/connections', badge: pendingCount },
   ];
 
   const handleLogout = async () => {
@@ -76,7 +102,7 @@ export function Sidebar({ isCollapsed, toggleSidebar, isMobileOpen = false, clos
             onClick={() => closeMobileSidebar?.()} // Close menu on navigation on mobile
             className={({ isActive }) =>
               cn(
-                'flex items-center gap-3 px-4 py-3 rounded-xl transition-colors',
+                'flex items-center gap-3 px-4 py-3 rounded-xl transition-colors relative',
                 isActive
                   ? 'bg-gray-50 text-brand-black font-semibold'
                   : 'text-gray-500 hover:bg-gray-50 hover:text-brand-black',
@@ -85,8 +111,20 @@ export function Sidebar({ isCollapsed, toggleSidebar, isMobileOpen = false, clos
             }
             title={isCollapsed ? item.label : undefined}
           >
-            <item.icon className="w-5 h-5 shrink-0" />
+            <div className="relative">
+              <item.icon className="w-5 h-5 shrink-0" />
+              {item.badge !== undefined && item.badge > 0 && isCollapsed && (
+                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-brand-purple text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {item.badge > 9 ? '9+' : item.badge}
+                </span>
+              )}
+            </div>
             <span className={cn(isCollapsed && "lg:hidden")}>{item.label}</span>
+            {item.badge !== undefined && item.badge > 0 && !isCollapsed && (
+              <span className="ml-auto bg-brand-purple text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                {item.badge > 99 ? '99+' : item.badge}
+              </span>
+            )}
           </NavLink>
         ))}
       </nav>

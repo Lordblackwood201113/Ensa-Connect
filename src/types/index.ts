@@ -88,7 +88,7 @@ export interface Notification {
   id: string;
   created_at: string;
   user_id: string;
-  type: 'discussion_reply';
+  type: 'discussion_reply' | 'connection_request' | 'connection_accepted';
   title: string;
   message: string;
   link: string;
@@ -97,3 +97,19 @@ export interface Notification {
   triggered_by_id?: string;
   triggered_by?: Profile;
 }
+
+// === CONNEXIONS ===
+export type ConnectionStatus = 'pending' | 'accepted' | 'rejected' | 'blocked';
+
+export interface Connection {
+  id: string;
+  requester_id: string;
+  receiver_id: string;
+  status: ConnectionStatus;
+  created_at: string;
+  updated_at: string;
+  requester?: Profile;
+  receiver?: Profile;
+}
+
+

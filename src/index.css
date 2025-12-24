@@ -110,6 +110,17 @@ select {
   padding-top: env(safe-area-inset-top, 0);
 }
 
+.safe-area-inset-bottom {
+  padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
+}
+
+/* Mobile input focus handling */
+@supports (-webkit-touch-callout: none) {
+  .keyboard-aware {
+    transition: padding-bottom 0.3s ease;
+  }
+}
+
 /* Touch-friendly interactive elements */
 .touch-manipulation {
   touch-action: manipulation;
@@ -149,11 +160,18 @@ select {
   animation: shimmer 1.5s infinite;
 }
 
-/* Breakpoint helper for xs screens */
+/* Breakpoint helper for xs screens (375px+) */
 @media (min-width: 375px) {
   .xs\:block { display: block; }
   .xs\:hidden { display: none; }
   .xs\:flex { display: flex; }
+  .xs\:inline { display: inline; }
+  .xs\:inline-block { display: inline-block; }
+  .xs\:inline-flex { display: inline-flex; }
+  .xs\:gap-2 { gap: 0.5rem; }
+  .xs\:gap-3 { gap: 0.75rem; }
+  .xs\:p-4 { padding: 1rem; }
+  .xs\:text-sm { font-size: 0.875rem; line-height: 1.25rem; }
 }
 
 @theme {

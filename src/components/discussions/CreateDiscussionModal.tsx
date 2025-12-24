@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -18,6 +18,18 @@ export function CreateDiscussionModal({ isOpen, onClose, onSuccess }: CreateDisc
     title: '',
     content: ''
   });
+  const titleInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-focus title on open
+  useEffect(() => {
+    if (isOpen) {
+      // Small delay for modal animation
+      const timer = setTimeout(() => {
+        titleInputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -51,40 +63,64 @@ export function CreateDiscussionModal({ isOpen, onClose, onSuccess }: CreateDisc
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Nouvelle discussion" size="lg">
-      <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+      <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-5">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Titre de votre question *
+          <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+            Titre de votre question <span className="text-red-500">*</span>
           </label>
-          <Input
+          <input
+            ref={titleInputRef}
+            type="text"
             required
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             placeholder="Ex: Comment trouver un stage en data science ?"
+            className="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-[16px] focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all touch-manipulation"
+            autoComplete="off"
+            enterKeyHint="next"
           />
+          <p className="text-[11px] text-gray-400 mt-1.5 sm:hidden">
+            Soyez précis pour obtenir de meilleures réponses
+          </p>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Détails *
+          <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+            Détails <span className="text-red-500">*</span>
           </label>
           <textarea
-            rows={6}
+            rows={5}
             required
-            className="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-[16px] focus:outline-none focus:ring-2 focus:ring-brand-purple resize-none touch-manipulation"
+            className="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-[16px] focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent resize-none touch-manipulation transition-all"
             value={formData.content}
             onChange={(e) => setFormData({ ...formData, content: e.target.value })}
             placeholder="Décrivez votre question ou demande en détail..."
+            enterKeyHint="done"
           />
+          <p className="text-[11px] text-gray-400 mt-1 flex justify-between">
+            <span className="hidden sm:inline">Décrivez le contexte de votre question</span>
+            <span className={formData.content.length > 500 ? 'text-orange-500' : ''}>
+              {formData.content.length}/1000
+            </span>
+          </p>
         </div>
 
-        {/* Mobile: Boutons en colonne inversée, Desktop: en ligne */}
-        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-gray-100">
-          <Button type="button" variant="ghost" onClick={onClose} className="w-full sm:w-auto">
+        {/* Mobile: Sticky footer with safe area */}
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-100 safe-area-inset-bottom">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onClose}
+            className="w-full sm:w-auto py-3 sm:py-2"
+          >
             Annuler
           </Button>
-          <Button type="submit" disabled={loading} className="w-full sm:w-auto">
-            {loading ? 'Publication...' : 'Publier'}
+          <Button
+            type="submit"
+            disabled={loading || !formData.title.trim() || !formData.content.trim()}
+            className="w-full sm:w-auto py-3 sm:py-2"
+          >
+            {loading ? 'Publication...' : 'Publier la discussion'}
           </Button>
         </div>
       </form>
