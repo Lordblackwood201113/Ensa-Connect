@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import type { Profile, Experience, Education } from '../types';
 import { Avatar } from '../components/ui/Avatar';
@@ -13,7 +13,6 @@ import { connectionService } from '../lib/connections';
 export default function ProfileView() {
   const { id } = useParams();
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [educations, setEducations] = useState<Education[]>([]);

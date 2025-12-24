@@ -1,11 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Send, CheckCircle2, Clock, Lock, Trash2, MessageCircle, MoreVertical } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { supabase } from '../../lib/supabase';
 import { Avatar } from '../ui/Avatar';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
-import { Input } from '../ui/Input';
 import { useAuth } from '../../context/AuthContext';
 import type { Discussion, Reply } from '../../types';
 import { formatDistanceToNow } from '../../lib/utils';
