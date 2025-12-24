@@ -15,6 +15,7 @@ export interface Profile {
   is_phone_visible: boolean;
   completion_score: number;
   onboarding_completed?: boolean;
+  must_change_password?: boolean;
 }
 
 export interface Experience {

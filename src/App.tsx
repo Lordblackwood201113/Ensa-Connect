@@ -13,13 +13,15 @@ import ProfileView from './pages/ProfileView';
 import EditProfile from './pages/EditProfile';
 import ProtectedRoute from './components/ProtectedRoute';
 import { InstallPWAPrompt } from './components/pwa/InstallPWAPrompt';
+import { PasswordChangeGuard } from './components/auth/PasswordChangeGuard';
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <InstallPWAPrompt />
-        <Routes>
+        <PasswordChangeGuard>
+          <InstallPWAPrompt />
+          <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
           
@@ -67,7 +69,8 @@ function App() {
             } />
              <Route path="/" element={<Navigate to="/dashboard" replace />} />
           </Route>
-        </Routes>
+          </Routes>
+        </PasswordChangeGuard>
       </AuthProvider>
     </BrowserRouter>
   );

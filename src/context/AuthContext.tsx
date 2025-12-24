@@ -8,6 +8,7 @@ interface AuthContextType {
   user: User | null;
   profile: Profile | null;
   loading: boolean;
+  mustChangePassword: boolean;
   refreshProfile: () => Promise<void>;
 }
 
@@ -114,8 +115,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Déterminer si l'utilisateur doit changer son mot de passe
+  const mustChangePassword = Boolean(profile?.must_change_password);
+
   return (
-    <AuthContext.Provider value={{ session, user, profile, loading, refreshProfile }}>
+    <AuthContext.Provider value={{ session, user, profile, loading, mustChangePassword, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );
