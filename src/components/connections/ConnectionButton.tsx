@@ -127,6 +127,31 @@ export function ConnectionButton({
   const config = configs[status];
   const Icon = config.icon;
 
+  // Mode icône seule avec style discret
+  if (!showLabel) {
+    const iconStyles = {
+      none: 'text-gray-500 hover:text-brand-lime hover:border-brand-lime hover:bg-brand-lime/5',
+      pending_sent: 'text-amber-500 border-amber-200 bg-amber-50',
+      pending_received: 'text-brand-purple hover:text-brand-purple hover:border-brand-purple hover:bg-brand-purple/5',
+      connected: 'text-green-500 border-green-200 bg-green-50'
+    };
+
+    return (
+      <button
+        onClick={config.action}
+        disabled={isActioning}
+        className={`p-2.5 rounded-full border border-gray-200 transition-all touch-manipulation active:scale-95 disabled:opacity-50 ${iconStyles[status]}`}
+        title={config.label}
+      >
+        {isActioning ? (
+          <Loader2 className="w-5 h-5 animate-spin" />
+        ) : (
+          <Icon className="w-5 h-5" />
+        )}
+      </button>
+    );
+  }
+
   return (
     <Button
       variant={config.variant}
@@ -140,7 +165,7 @@ export function ConnectionButton({
       ) : (
         <Icon className="w-4 h-4" />
       )}
-      {showLabel && <span>{config.label}</span>}
+      <span>{config.label}</span>
     </Button>
   );
 }

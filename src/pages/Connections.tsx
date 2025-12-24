@@ -3,6 +3,7 @@ import { connectionService } from '../lib/connections';
 import { useAuth } from '../context/AuthContext';
 import { ConnectionCard } from '../components/connections/ConnectionCard';
 import { PendingRequestCard } from '../components/connections/PendingRequestCard';
+import { SentRequestCard } from '../components/connections/SentRequestCard';
 import { Card } from '../components/ui/Card';
 import { Users, UserPlus, Search, Clock, X } from 'lucide-react';
 import { cn } from '../lib/utils';
@@ -234,18 +235,13 @@ export default function Connections() {
           {activeTab === 'sent' && (
             sentRequests.length > 0 ? (
               <div className="space-y-2.5 xs:space-y-3">
-                {sentRequests.map(request => {
-                  const receiver = request.receiver;
-                  if (!receiver) return null;
-
-                  return (
-                    <ConnectionCard
-                      key={request.id}
-                      profile={receiver}
-                      showActions={false}
-                    />
-                  );
-                })}
+                {sentRequests.map(request => (
+                  <SentRequestCard
+                    key={request.id}
+                    connection={request}
+                    onUpdate={loadData}
+                  />
+                ))}
               </div>
             ) : (
               <EmptyState

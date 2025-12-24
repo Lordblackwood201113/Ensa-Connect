@@ -145,42 +145,48 @@ export default function ProfileView() {
                 />
             </div>
 
-            {/* Actions - positionnées à droite sur desktop */}
-            <div className="flex flex-col sm:flex-row justify-end pt-14 sm:pt-4 mb-4 gap-2 sm:gap-0">
+            {/* Actions - positionnées à droite */}
+            <div className="flex justify-end pt-14 sm:pt-4 mb-4">
                 {isOwnProfile ? (
-                   <Link to="/profile/edit" className="w-full sm:w-auto">
-                     <Button variant="outline" className="w-full sm:w-auto">Modifier mon profil</Button>
+                   <Link to="/profile/edit">
+                     <Button variant="outline">Modifier mon profil</Button>
                    </Link>
                 ) : (
-                   <div className="flex flex-row gap-2 w-full sm:w-auto">
-                     {/* Bouton de connexion */}
-                     <ConnectionButton targetUserId={profile.id} size="md" />
-                     
-                     
+                   <div className="flex items-center gap-2">
+                     {/* Bouton de connexion - icône seule, discret */}
+                     <ConnectionButton targetUserId={profile.id} size="md" showLabel={false} />
+
+                     {/* LinkedIn */}
                      {profile.linkedin_url && (
-                       <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer" className="hidden sm:block">
-                         <Button variant="outline" className="gap-2">
-                           <Linkedin className="w-4 h-4" />
-                         </Button>
+                       <a
+                         href={profile.linkedin_url}
+                         target="_blank"
+                         rel="noopener noreferrer"
+                         className="p-2.5 rounded-full border border-gray-200 text-gray-500 hover:text-[#0A66C2] hover:border-[#0A66C2] hover:bg-[#0A66C2]/5 transition-all touch-manipulation active:scale-95"
+                         title="Voir le profil LinkedIn"
+                       >
+                         <Linkedin className="w-5 h-5" />
                        </a>
                      )}
+
+                     {/* Copier email */}
                      {profile.email && (
-                        <Button
-                            variant="ghost"
-                            className="gap-2 hidden sm:flex"
+                        <button
                             onClick={() => {
                                 if (profile.email) {
                                     navigator.clipboard.writeText(profile.email);
                                     setCopiedEmail(true);
                                 }
                             }}
+                            className="p-2.5 rounded-full border border-gray-200 text-gray-500 hover:text-brand-purple hover:border-brand-purple hover:bg-brand-purple/5 transition-all touch-manipulation active:scale-95"
+                            title={copiedEmail ? "Email copié !" : "Copier l'email"}
                         >
                            {copiedEmail ? (
-                               <Check className="w-4 h-4 text-green-500" />
+                               <Check className="w-5 h-5 text-green-500" />
                            ) : (
-                               <Copy className="w-4 h-4" />
+                               <Copy className="w-5 h-5" />
                            )}
-                        </Button>
+                        </button>
                      )}
                    </div>
                 )}
