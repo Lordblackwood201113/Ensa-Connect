@@ -1,9 +1,10 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Users, GraduationCap, Calendar, Briefcase, MessageCircle, UserPlus, LogOut, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Users, GraduationCap, Calendar, Briefcase, MessageCircle, UserPlus, LogOut, ChevronLeft, ChevronRight, X, Mail } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { supabase } from '../../lib/supabase';
 import { connectionService } from '../../lib/connections';
+import { messageService } from '../../lib/messages';
 
 import { useAuth } from '../../context/AuthContext';
 
@@ -18,22 +19,53 @@ export function Sidebar({ isCollapsed, toggleSidebar, isMobileOpen = false, clos
   const navigate = useNavigate();
   const { user } = useAuth();
   const [pendingCount, setPendingCount] = useState(0);
-  
+  const [unreadMessages, setUnreadMessages] = useState(0);
+
 
   useEffect(() => {
     if (user) {
       loadCounts();
       // Rafraîchir les compteurs toutes les 30 secondes
       const interval = setInterval(loadCounts, 30000);
-      return () => clearInterval(interval);
+
+      // S'abonner aux nouveaux messages pour mise à jour en temps réel
+      const channel = supabase
+        .channel('sidebar_messages')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages',
+          },
+          () => loadCounts()
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'messages',
+          },
+          () => loadCounts()
+        )
+        .subscribe();
+
+      return () => {
+        clearInterval(interval);
+        supabase.removeChannel(channel);
+      };
     }
   }, [user]);
 
   const loadCounts = async () => {
     if (!user) return;
-    
+
     const pendingRes = await connectionService.getPendingCount(user.id);
     setPendingCount(pendingRes.count);
+
+    const unreadCount = await messageService.getUnreadCount(user.id);
+    setUnreadMessages(unreadCount);
   };
 
   const navItems = [
@@ -42,8 +74,8 @@ export function Sidebar({ isCollapsed, toggleSidebar, isMobileOpen = false, clos
     { icon: Calendar, label: 'Événements', path: '/events' },
     { icon: Briefcase, label: 'Jobs', path: '/jobs' },
     { icon: MessageCircle, label: 'Discussions', path: '/discussions' },
-    
     { icon: UserPlus, label: 'Connexions', path: '/connections', badge: pendingCount },
+    { icon: Mail, label: 'Messages', path: '/messages', badge: unreadMessages },
   ];
 
   const handleLogout = async () => {

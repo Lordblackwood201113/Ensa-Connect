@@ -89,7 +89,7 @@ export interface Notification {
   id: string;
   created_at: string;
   user_id: string;
-  type: 'discussion_reply' | 'connection_request' | 'connection_accepted';
+  type: 'discussion_reply' | 'connection_request' | 'connection_accepted' | 'new_message';
   title: string;
   message: string;
   link: string;
@@ -111,6 +111,33 @@ export interface Connection {
   updated_at: string;
   requester?: Profile;
   receiver?: Profile;
+}
+
+// === MESSAGERIE ===
+export interface Conversation {
+  id: string;
+  participant_1: string;
+  participant_2: string;
+  connection_id: string;
+  last_message_at: string;
+  created_at: string;
+}
+
+export interface ConversationWithDetails extends Conversation {
+  other_participant: Profile;
+  last_message: Message | null;
+  unread_count: number;
+}
+
+export interface Message {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  content: string;
+  created_at: string;
+  is_read: boolean;
+  read_at: string | null;
+  sender?: Profile;
 }
 
 

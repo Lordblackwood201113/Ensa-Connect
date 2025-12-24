@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { Avatar } from '../ui/Avatar';
 import { Card } from '../ui/Card';
-import { UserMinus, MapPin, Briefcase, ChevronRight } from 'lucide-react';
+import { UserMinus, MapPin, Briefcase, ChevronRight, MessageCircle } from 'lucide-react';
 import type { Profile } from '../../types';
+import { messageService } from '../../lib/messages';
+import { useAuth } from '../../context/AuthContext';
 
 interface ConnectionCardProps {
   profile: Profile;
@@ -16,6 +18,7 @@ export function ConnectionCard({
   showActions = true
 }: ConnectionCardProps) {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const handleCardClick = () => {
     navigate(`/member/${profile.id}`);
@@ -24,6 +27,16 @@ export function ConnectionCard({
   const handleRemove = (e: React.MouseEvent) => {
     e.stopPropagation();
     onRemove?.();
+  };
+
+  const handleMessage = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) return;
+
+    const { data } = await messageService.getOrCreateConversation(user.id, profile.id);
+    if (data) {
+      navigate(`/messages/${data.id}`);
+    }
   };
 
   return (
@@ -76,7 +89,16 @@ export function ConnectionCard({
         </div>
 
         {/* Actions or Arrow */}
-        <div className="flex items-center shrink-0 flex-shrink-0 ml-1">
+        <div className="flex items-center shrink-0 flex-shrink-0 ml-1 gap-1">
+          {showActions && (
+            <button
+              onClick={handleMessage}
+              className="p-1.5 xs:p-2 text-gray-300 hover:text-brand-purple hover:bg-brand-purple/10 active:bg-brand-purple/20 rounded-full transition-colors touch-manipulation shrink-0"
+              title="Envoyer un message"
+            >
+              <MessageCircle className="w-4 h-4" />
+            </button>
+          )}
           {showActions && onRemove && (
             <button
               onClick={handleRemove}

@@ -1,24 +1,27 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import type { Profile, Experience, Education } from '../types';
 import { Avatar } from '../components/ui/Avatar';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { ConnectionButton } from '../components/connections/ConnectionButton';
-import { Linkedin, MapPin, Building, GraduationCap, ArrowLeft, Briefcase, Copy, Check, Phone, Users } from 'lucide-react';
+import { Linkedin, MapPin, Building, GraduationCap, ArrowLeft, Briefcase, Copy, Check, Phone, Users, MessageCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { connectionService } from '../lib/connections';
+import { messageService } from '../lib/messages';
 
 export default function ProfileView() {
   const { id } = useParams();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [educations, setEducations] = useState<Education[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [connectionsCount, setConnectionsCount] = useState(0);
+  const [connectionStatus, setConnectionStatus] = useState<'none' | 'pending_sent' | 'pending_received' | 'connected'>('none');
 
   useEffect(() => {
     if (copiedEmail) {
@@ -65,6 +68,12 @@ export default function ProfileView() {
       const { count } = await connectionService.getConnectionsCount(userId);
       setConnectionsCount(count);
 
+      // Fetch connection status with current user
+      if (user && user.id !== userId) {
+        const { status } = await connectionService.getConnectionStatus(user.id, userId);
+        setConnectionStatus(status);
+      }
+
     } catch (error) {
       console.error('Error fetching profile data:', error);
     } finally {
@@ -98,6 +107,17 @@ export default function ProfileView() {
   );
 
   const isOwnProfile = user?.id === profile.id;
+
+  const handleStartConversation = async () => {
+    if (!user || !profile) return;
+
+    const { data, error } = await messageService.getOrCreateConversation(user.id, profile.id);
+    if (data) {
+      navigate(`/messages/${data.id}`);
+    } else if (error) {
+      console.error('Error starting conversation:', error);
+    }
+  };
 
   const formatDate = (dateStr: string | null) => {
       if (!dateStr) return '';
@@ -155,6 +175,17 @@ export default function ProfileView() {
                    <div className="flex items-center gap-2">
                      {/* Bouton de connexion - icône seule, discret */}
                      <ConnectionButton targetUserId={profile.id} size="md" showLabel={false} />
+
+                     {/* Bouton Message - visible uniquement si connecté */}
+                     {connectionStatus === 'connected' && (
+                       <button
+                         onClick={handleStartConversation}
+                         className="p-2.5 rounded-full border border-gray-200 text-gray-500 hover:text-brand-purple hover:border-brand-purple hover:bg-brand-purple/5 transition-all touch-manipulation active:scale-95"
+                         title="Envoyer un message"
+                       >
+                         <MessageCircle className="w-5 h-5" />
+                       </button>
+                     )}
 
                      {/* LinkedIn */}
                      {profile.linkedin_url && (

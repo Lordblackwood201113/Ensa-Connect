@@ -11,6 +11,8 @@ import Discussions from './pages/Discussions';
 import Connections from './pages/Connections';
 import ProfileView from './pages/ProfileView';
 import EditProfile from './pages/EditProfile';
+import { Messages } from './pages/Messages';
+import { Conversation } from './pages/Conversation';
 import ProtectedRoute from './components/ProtectedRoute';
 import { InstallPWAPrompt } from './components/pwa/InstallPWAPrompt';
 import { UpdatePrompt } from './components/pwa/UpdatePrompt';
@@ -57,6 +59,16 @@ function App() {
             <Route path="/connections" element={
               <DashboardLayout>
                 <Connections />
+              </DashboardLayout>
+            } />
+            <Route path="/messages" element={
+              <DashboardLayout>
+                <Messages />
+              </DashboardLayout>
+            } />
+            <Route path="/messages/:conversationId" element={
+              <DashboardLayout>
+                <Conversation />
               </DashboardLayout>
             } />
             <Route path="/member/:id" element={
