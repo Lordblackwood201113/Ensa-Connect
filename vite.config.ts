@@ -9,8 +9,11 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       includeAssets: ['logo.jpeg', 'logo-192.png', 'logo-512.png'],
+      devOptions: {
+        enabled: false
+      },
       manifest: {
         name: 'ENSA Connect',
         short_name: 'ENSA Connect',
@@ -44,6 +47,11 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,jpeg,jpg,woff,woff2}'],
+        // Force le nouveau service worker à prendre le contrôle immédiatement
+        skipWaiting: true,
+        clientsClaim: true,
+        // Nettoyer les anciens caches
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,

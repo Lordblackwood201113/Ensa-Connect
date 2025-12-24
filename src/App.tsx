@@ -13,6 +13,7 @@ import ProfileView from './pages/ProfileView';
 import EditProfile from './pages/EditProfile';
 import ProtectedRoute from './components/ProtectedRoute';
 import { InstallPWAPrompt } from './components/pwa/InstallPWAPrompt';
+import { UpdatePrompt } from './components/pwa/UpdatePrompt';
 import { PasswordChangeGuard } from './components/auth/PasswordChangeGuard';
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
       <AuthProvider>
         <PasswordChangeGuard>
           <InstallPWAPrompt />
+          <UpdatePrompt />
           <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
