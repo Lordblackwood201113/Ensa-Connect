@@ -98,7 +98,7 @@ export default function Connections() {
   ];
 
   return (
-    <div className="space-y-3 sm:space-y-6 pb-20 sm:pb-10 overflow-hidden">
+    <div className="space-y-3 sm:space-y-6 pb-20 sm:pb-10 overflow-hidden w-full max-w-full">
       {/* Header */}
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
@@ -184,7 +184,7 @@ export default function Connections() {
           {/* Tab: Connexions */}
           {activeTab === 'connections' && (
             filteredConnections.length > 0 ? (
-              <div className="space-y-2.5 xs:space-y-3">
+              <div className="space-y-2.5 xs:space-y-3 w-full max-w-full">
                 {filteredConnections.map(connection => {
                   const otherUser = getOtherUser(connection);
                   if (!otherUser) return null;
@@ -213,7 +213,7 @@ export default function Connections() {
           {/* Tab: Demandes reçues */}
           {activeTab === 'pending' && (
             pendingRequests.length > 0 ? (
-              <div className="space-y-2.5 xs:space-y-3">
+              <div className="space-y-2.5 xs:space-y-3 w-full max-w-full">
                 {pendingRequests.map(request => (
                   <PendingRequestCard
                     key={request.id}
@@ -234,7 +234,7 @@ export default function Connections() {
           {/* Tab: Demandes envoyées */}
           {activeTab === 'sent' && (
             sentRequests.length > 0 ? (
-              <div className="space-y-2.5 xs:space-y-3">
+              <div className="space-y-2.5 xs:space-y-3 w-full max-w-full">
                 {sentRequests.map(request => (
                   <SentRequestCard
                     key={request.id}
