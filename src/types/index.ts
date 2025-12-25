@@ -89,7 +89,7 @@ export interface Notification {
   id: string;
   created_at: string;
   user_id: string;
-  type: 'discussion_reply' | 'connection_request' | 'connection_accepted' | 'new_message' | 'discussion_mention' | 'promo_group_mention';
+  type: 'discussion_reply' | 'connection_request' | 'connection_accepted' | 'new_message' | 'discussion_mention' | 'promo_group_mention' | 'promo_group_message';
   title: string;
   message: string;
   link: string;

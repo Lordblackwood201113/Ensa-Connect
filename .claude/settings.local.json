@@ -18,7 +18,8 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Skill(sc:workflow)",
-      "Skill(sc:workflow:*)"
+      "Skill(sc:workflow:*)",
+      "Bash(find:*)"
     ]
   }
 }
