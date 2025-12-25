@@ -218,9 +218,9 @@ export function PromoGroupChat({ promotion }: PromoGroupChatProps) {
   const messageGroups = groupMessagesByDate(messages);
 
   return (
-    <div className="flex flex-col h-full bg-gray-50">
-      {/* Messages area - scrollable */}
-      <div ref={containerRef} className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
+    <div className="flex flex-col h-full bg-gray-50 overflow-hidden">
+      {/* Messages area - scrollable only this part */}
+      <div ref={containerRef} className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-3 min-h-0">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 py-8">
             <MessageCircle className="w-16 h-16 mx-auto mb-4 text-gray-200" />
@@ -323,8 +323,8 @@ export function PromoGroupChat({ promotion }: PromoGroupChatProps) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div className={MODAL_FOOTER_CLASSES}>
+      {/* Input - Fixed at bottom, never scrolls */}
+      <div className={cn(MODAL_FOOTER_CLASSES, "sticky bottom-0")}>
         <MentionInput
           value={newMessage}
           onChange={setNewMessage}

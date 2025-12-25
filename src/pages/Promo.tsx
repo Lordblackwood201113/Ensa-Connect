@@ -85,17 +85,17 @@ export default function Promo() {
     );
   }
 
+  // Hauteur du header de page (titre + tabs) = environ 120px mobile, 130px desktop
+  const headerHeight = activeTab === 'groupe' ? 'h-[calc(100dvh-180px)] sm:h-[calc(100dvh-200px)]' : '';
+
   return (
     <div className={cn(
       activeTab === 'groupe'
-        ? "flex flex-col h-[calc(100dvh-64px)] sm:h-[calc(100dvh-80px)]"
+        ? "flex flex-col"
         : "space-y-4 sm:space-y-6 pb-20 sm:pb-10"
     )}>
       {/* Header - Mobile optimized */}
-      <div className={cn(
-        "flex flex-col gap-3 shrink-0",
-        activeTab === 'groupe' && "px-0"
-      )}>
+      <div className="flex flex-col gap-3 shrink-0">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-brand-black">Ma Promotion</h1>
@@ -234,8 +234,8 @@ export default function Promo() {
           )}
         </>
       ) : (
-        /* Group Chat Tab - Full height chat experience */
-        <div className="flex-1 min-h-0 overflow-hidden">
+        /* Group Chat Tab - Fixed height chat experience like Facebook */
+        <div className={cn("overflow-hidden", headerHeight)}>
           <PromoGroupChat promotion={userProfile.promotion} />
         </div>
       )}
