@@ -60,7 +60,7 @@ export function PendingRequestCard({ connection, onUpdate }: PendingRequestCardP
             size="md"
             className="w-10 h-10 xs:w-12 xs:h-12"
           />
-          <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 xs:w-3 xs:h-3 bg-brand-purple rounded-full border-2 border-white" />
+          <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 xs:w-3 xs:h-3 bg-brand-lime rounded-full border-2 border-white" />
         </div>
 
         {/* Info */}

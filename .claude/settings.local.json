@@ -6,7 +6,19 @@
       "Bash(npm run build:*)",
       "Bash(dir:*)",
       "Bash(cat:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(mkdir:*)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(./node_modules/.bin/tsc:*)",
+      "Bash(timeout:*)",
+      "Bash(findstr:*)",
+      "Bash(powershell -Command:*)",
+      "Skill(sc:implement)",
+      "Skill(sc:implement:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Skill(sc:workflow)",
+      "Skill(sc:workflow:*)"
     ]
   }
 }

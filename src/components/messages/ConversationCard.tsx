@@ -79,7 +79,7 @@ export function ConversationCard({ conversation, onClick, onDelete }: Props) {
           size="md"
         />
         {unread_count > 0 && (
-          <span className="absolute -top-1 -right-1 bg-brand-purple text-white text-xs font-medium rounded-full min-w-[20px] h-5 flex items-center justify-center px-1">
+          <span className="absolute -top-1 -right-1 bg-brand-lime text-brand-black text-xs font-medium rounded-full min-w-[20px] h-5 flex items-center justify-center px-1">
             {unread_count > 99 ? '99+' : unread_count}
           </span>
         )}

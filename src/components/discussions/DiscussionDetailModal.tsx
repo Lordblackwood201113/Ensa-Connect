@@ -1,14 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, CheckCircle2, Clock, Lock, Trash2, MessageCircle, MoreVertical } from 'lucide-react';
+import { CheckCircle2, Clock, Lock, Trash2, MessageCircle, MoreVertical } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { supabase } from '../../lib/supabase';
 import { Avatar } from '../ui/Avatar';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { useAuth } from '../../context/AuthContext';
-import type { Discussion, Reply } from '../../types';
+import type { Discussion, Reply, Profile } from '../../types';
 import { formatDistanceToNow } from '../../lib/utils';
 import { Link } from 'react-router-dom';
+import { MentionInput, extractMentions, renderContentWithMentions } from './MentionInput';
+import { mentionService } from '../../lib/mentions';
 
 interface DiscussionDetailModalProps {
   discussion: Discussion | null;
@@ -24,10 +26,16 @@ export function DiscussionDetailModal({ discussion, isOpen, onClose, onUpdate }:
   const [loading, setLoading] = useState(false);
   const [loadingReplies, setLoadingReplies] = useState(false);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
-  const [isInputFocused, setIsInputFocused] = useState(false);
+  const [connections, setConnections] = useState<Profile[]>([]);
   const repliesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  // Charger les connexions pour les mentions
+  useEffect(() => {
+    if (user && isOpen) {
+      mentionService.getConnectionsForMentions(user.id).then(setConnections);
+    }
+  }, [user, isOpen]);
 
   useEffect(() => {
     if (discussion && isOpen) {
@@ -41,20 +49,6 @@ export function DiscussionDetailModal({ discussion, isOpen, onClose, onUpdate }:
       repliesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [replies.length]);
-
-  // Handle keyboard on mobile - scroll input into view
-  useEffect(() => {
-    if (isInputFocused && contentRef.current) {
-      // Small delay to let keyboard appear
-      const timer = setTimeout(() => {
-        contentRef.current?.scrollTo({
-          top: contentRef.current.scrollHeight,
-          behavior: 'smooth'
-        });
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-  }, [isInputFocused]);
 
   // Close actions menu when clicking outside
   useEffect(() => {
@@ -88,23 +82,41 @@ export function DiscussionDetailModal({ discussion, isOpen, onClose, onUpdate }:
     }
   };
 
-  const handleSubmitReply = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmitReply = async () => {
     if (!user || !discussion || !newReply.trim()) return;
 
+    const content = newReply.trim();
     setLoading(true);
+
     try {
       const { error } = await supabase
         .from('replies')
         .insert({
-          content: newReply.trim(),
+          content,
           discussion_id: discussion.id,
           author_id: user.id
         });
 
       if (error) throw error;
 
+      // Créer les notifications pour les participants
       await createNotificationsForParticipants();
+
+      // Extraire et notifier les mentions
+      const mentionedNames = extractMentions(content);
+      if (mentionedNames.length > 0) {
+        const mentionedUserIds = await mentionService.findMentionedUserIds(mentionedNames, connections);
+        const senderName = `${user.user_metadata?.first_name || ''} ${user.user_metadata?.last_name || ''}`.trim() || 'Quelqu\'un';
+
+        await mentionService.createMentionNotifications(
+          mentionedUserIds,
+          user.id,
+          senderName,
+          discussion.id,
+          discussion.title,
+          content
+        );
+      }
 
       setNewReply('');
       fetchReplies();
@@ -334,7 +346,7 @@ export function DiscussionDetailModal({ discussion, isOpen, onClose, onUpdate }:
                       </div>
                     </Link>
                     <p className="text-gray-600 text-sm whitespace-pre-line leading-relaxed ml-8 sm:ml-11">
-                      {reply.content}
+                      {renderContentWithMentions(reply.content)}
                     </p>
                   </div>
                 ))}
@@ -343,8 +355,6 @@ export function DiscussionDetailModal({ discussion, isOpen, onClose, onUpdate }:
             )}
           </div>
 
-          {/* Spacer for mobile keyboard */}
-          <div className={`sm:hidden transition-all duration-200 ${isInputFocused ? 'h-8' : 'h-0'}`} />
         </div>
 
         {/* Footer - Reply Form or Closed Message */}
@@ -355,29 +365,14 @@ export function DiscussionDetailModal({ discussion, isOpen, onClose, onUpdate }:
               <span className="text-sm">Cette discussion est fermée</span>
             </div>
           ) : (
-            <form onSubmit={handleSubmitReply} className="flex gap-2 items-center">
-              <div className="flex-1 relative">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={newReply}
-                  onChange={(e) => setNewReply(e.target.value)}
-                  onFocus={() => setIsInputFocused(true)}
-                  onBlur={() => setIsInputFocused(false)}
-                  placeholder="Écrire une réponse..."
-                  className="w-full bg-gray-50 border border-gray-200 rounded-full py-2.5 sm:py-3 px-4 text-[16px] focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all touch-manipulation"
-                  autoComplete="off"
-                  enterKeyHint="send"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={loading || !newReply.trim()}
-                className="shrink-0 w-10 h-10 sm:w-11 sm:h-11 bg-brand-black text-white rounded-full flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all touch-manipulation"
-              >
-                <Send className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
-            </form>
+            <MentionInput
+              value={newReply}
+              onChange={setNewReply}
+              onSubmit={handleSubmitReply}
+              connections={connections}
+              placeholder="Écrire une réponse... (@ pour mentionner)"
+              loading={loading}
+            />
           )}
 
           {/* Author Actions - Desktop only (mobile uses menu) */}

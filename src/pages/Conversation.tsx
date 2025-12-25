@@ -142,7 +142,7 @@ export function Conversation() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)] bg-gray-50">
+    <div className="flex flex-col h-[calc(100dvh-64px)] sm:h-[calc(100dvh-80px)] bg-gray-50">
       {/* Header */}
       <ConversationHeader
         user={otherUser}
@@ -151,7 +151,7 @@ export function Conversation() {
       />
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
         {messages.length === 0 ? (
           <div className="text-center text-gray-500 py-8">
             Envoyez votre premier message !
