@@ -1,5 +1,5 @@
 import { Send, Loader2 } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import { cn, MODAL_FOOTER_CLASSES } from '../../lib/utils';
 
 interface Props {
   value: string;
@@ -17,7 +17,7 @@ export function MessageInput({ value, onChange, onSend, sending }: Props) {
   };
 
   return (
-    <div className="border-t border-gray-100 p-3 sm:p-4 bg-white shrink-0 safe-area-inset-bottom">
+    <div className={MODAL_FOOTER_CLASSES}>
       <div className="flex items-end gap-2">
         <textarea
           value={value}

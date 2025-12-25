@@ -87,7 +87,7 @@ export function ConversationCard({ conversation, onClick, onDelete }: Props) {
 
       {/* Contenu */}
       <div className="flex-1 min-w-0">
-        <div className="flex justify-between items-baseline gap-2">
+        <div className="flex flex-col gap-0.5">
           <h3 className={cn(
             "font-medium truncate",
             unread_count > 0 && "text-gray-900"
@@ -95,7 +95,7 @@ export function ConversationCard({ conversation, onClick, onDelete }: Props) {
             {fullName}
           </h3>
           {last_message && (
-            <span className="text-xs text-gray-500 shrink-0">
+            <span className="text-[10px] text-gray-500">
               {formatTime(last_message.created_at)}
             </span>
           )}

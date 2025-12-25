@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { useAuth } from '../../context/AuthContext';
+import { cn, MODAL_FOOTER_CLASSES } from '../../lib/utils';
 
 interface CreateDiscussionModalProps {
   isOpen: boolean;
@@ -105,7 +106,7 @@ export function CreateDiscussionModal({ isOpen, onClose, onSuccess }: CreateDisc
         </div>
 
         {/* Mobile: Sticky footer with safe area */}
-        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-100 safe-area-inset-bottom">
+        <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-4", MODAL_FOOTER_CLASSES)}>
           <Button
             type="button"
             variant="ghost"

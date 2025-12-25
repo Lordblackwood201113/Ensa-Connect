@@ -88,11 +88,14 @@ export default function Promo() {
   return (
     <div className={cn(
       activeTab === 'groupe'
-        ? "flex flex-col h-[calc(100dvh-140px)] sm:h-[calc(100dvh-120px)]"
+        ? "flex flex-col h-[calc(100dvh-64px)] sm:h-[calc(100dvh-80px)]"
         : "space-y-4 sm:space-y-6 pb-20 sm:pb-10"
     )}>
       {/* Header - Mobile optimized */}
-      <div className="flex flex-col gap-3 shrink-0">
+      <div className={cn(
+        "flex flex-col gap-3 shrink-0",
+        activeTab === 'groupe' && "px-0"
+      )}>
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-brand-black">Ma Promotion</h1>
@@ -231,8 +234,8 @@ export default function Promo() {
           )}
         </>
       ) : (
-        /* Group Chat Tab */
-        <div className="flex-1 min-h-0">
+        /* Group Chat Tab - Full height chat experience */
+        <div className="flex-1 min-h-0 overflow-hidden">
           <PromoGroupChat promotion={userProfile.promotion} />
         </div>
       )}

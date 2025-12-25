@@ -7,7 +7,7 @@ import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { useAuth } from '../../context/AuthContext';
 import type { Discussion, Reply, Profile } from '../../types';
-import { formatDistanceToNow } from '../../lib/utils';
+import { formatDistanceToNow, MODAL_FOOTER_CLASSES } from '../../lib/utils';
 import { Link } from 'react-router-dom';
 import { MentionInput, extractMentions, renderContentWithMentions } from './MentionInput';
 import { mentionService } from '../../lib/mentions';
@@ -358,7 +358,7 @@ export function DiscussionDetailModal({ discussion, isOpen, onClose, onUpdate }:
         </div>
 
         {/* Footer - Reply Form or Closed Message */}
-        <div className="border-t border-gray-100 p-3 sm:p-4 bg-white shrink-0 safe-area-inset-bottom">
+        <div className={MODAL_FOOTER_CLASSES}>
           {discussion.is_closed ? (
             <div className="flex items-center justify-center gap-2 text-gray-500 py-2">
               <Lock className="w-4 h-4" />

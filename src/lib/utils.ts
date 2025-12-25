@@ -16,3 +16,10 @@ export function formatDistanceToNow(date: Date): string {
   
   return date.toLocaleDateString('fr-FR');
 }
+
+/**
+ * Classes CSS pour le footer de modal/chat avec safe area
+ * Basé sur design.json - Modal.footer
+ * Utilisé pour les footers de modals et composants de chat
+ */
+export const MODAL_FOOTER_CLASSES = 'border-t border-gray-100 p-3 sm:p-4 bg-white shrink-0 safe-area-inset-bottom';

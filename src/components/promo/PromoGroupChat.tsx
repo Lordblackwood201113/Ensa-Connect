@@ -10,7 +10,7 @@ import { Avatar } from '../ui/Avatar';
 import { supabase } from '../../lib/supabase';
 import { format, isToday, isYesterday } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { cn } from '../../lib/utils';
+import { cn, MODAL_FOOTER_CLASSES } from '../../lib/utils';
 import { Link } from 'react-router-dom';
 
 interface PromoGroupChatProps {
@@ -207,8 +207,10 @@ export function PromoGroupChat({ promotion }: PromoGroupChatProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 animate-spin text-brand-lime" />
+      <div className="flex flex-col h-full bg-gray-50">
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-brand-lime" />
+        </div>
       </div>
     );
   }
@@ -216,14 +218,14 @@ export function PromoGroupChat({ promotion }: PromoGroupChatProps) {
   const messageGroups = groupMessagesByDate(messages);
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 rounded-2xl overflow-hidden">
-      {/* Messages */}
-      <div ref={containerRef} className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
+    <div className="flex flex-col h-full bg-gray-50">
+      {/* Messages area - scrollable */}
+      <div ref={containerRef} className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
         {messages.length === 0 ? (
-          <div className="text-center text-gray-500 py-12">
-            <MessageCircle className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-            <p className="font-medium">Aucun message pour le moment</p>
-            <p className="text-sm text-gray-400 mt-1">
+          <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 py-8">
+            <MessageCircle className="w-16 h-16 mx-auto mb-4 text-gray-200" />
+            <p className="font-semibold text-gray-600 mb-1">Aucun message</p>
+            <p className="text-sm text-gray-400">
               Soyez le premier à écrire dans le groupe !
             </p>
           </div>
@@ -322,7 +324,7 @@ export function PromoGroupChat({ promotion }: PromoGroupChatProps) {
       </div>
 
       {/* Input */}
-      <div className="border-t border-gray-100 p-3 sm:p-4 bg-white shrink-0 safe-area-inset-bottom">
+      <div className={MODAL_FOOTER_CLASSES}>
         <MentionInput
           value={newMessage}
           onChange={setNewMessage}
