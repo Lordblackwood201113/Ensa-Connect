@@ -149,6 +149,54 @@ export const promoGroupService = {
   },
 
   /**
+   * Crée des notifications pour tous les membres du groupe (nouveau message)
+   * Exclut l'expéditeur et les utilisateurs déjà mentionnés
+   */
+  async createGroupMessageNotifications(
+    promotion: string,
+    senderId: string,
+    senderName: string,
+    messageContent: string,
+    excludeUserIds: string[] = []
+  ): Promise<void> {
+    try {
+      // Récupérer tous les membres de la promotion
+      const members = await this.getPromoMembers(promotion);
+
+      // Exclure l'expéditeur et les utilisateurs déjà notifiés (mentions)
+      const usersToNotify = members
+        .filter((m) => m.id !== senderId && !excludeUserIds.includes(m.id))
+        .map((m) => m.id);
+
+      if (usersToNotify.length === 0) return;
+
+      // Tronquer le contenu pour la notification
+      const truncatedContent =
+        messageContent.length > 80
+          ? messageContent.substring(0, 80) + '...'
+          : messageContent;
+
+      const notifications = usersToNotify.map((userId) => ({
+        user_id: userId,
+        type: 'promo_group_message',
+        title: `Nouveau message - ${promotion}`,
+        message: `${senderName}: ${truncatedContent}`,
+        link: `/promo?tab=groupe`,
+        is_read: false,
+        triggered_by_id: senderId,
+      }));
+
+      const { error } = await supabase.from('notifications').insert(notifications);
+
+      if (error) {
+        console.error('Error creating promo group notifications:', error);
+      }
+    } catch (error) {
+      console.error('Error in createGroupMessageNotifications:', error);
+    }
+  },
+
+  /**
    * Supprime un message (seulement le sien)
    */
   async deleteMessage(messageId: string): Promise<{ error: Error | null }> {

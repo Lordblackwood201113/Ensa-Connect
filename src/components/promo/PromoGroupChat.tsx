@@ -139,11 +139,13 @@ export function PromoGroupChat({ promotion }: PromoGroupChatProps) {
         prev.map((m) => (m.id === optimisticMessage.id ? data : m))
       );
 
+      const senderName = `${user.user_metadata?.first_name || ''} ${user.user_metadata?.last_name || ''}`.trim() || 'Quelqu\'un';
+      let mentionedUserIds: string[] = [];
+
       // Extraire et notifier les mentions
       const mentionedNames = extractMentions(content);
       if (mentionedNames.length > 0) {
-        const mentionedUserIds = await mentionService.findMentionedUserIds(mentionedNames, promoMembers);
-        const senderName = `${user.user_metadata?.first_name || ''} ${user.user_metadata?.last_name || ''}`.trim() || 'Quelqu\'un';
+        mentionedUserIds = await mentionService.findMentionedUserIds(mentionedNames, promoMembers);
 
         await promoGroupService.createMentionNotifications(
           mentionedUserIds,
@@ -153,6 +155,15 @@ export function PromoGroupChat({ promotion }: PromoGroupChatProps) {
           content
         );
       }
+
+      // Notifier tous les autres membres du groupe (sauf mentions déjà notifiées)
+      await promoGroupService.createGroupMessageNotifications(
+        promotion,
+        user.id,
+        senderName,
+        content,
+        mentionedUserIds
+      );
     }
 
     setSending(false);
