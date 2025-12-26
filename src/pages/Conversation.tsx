@@ -142,48 +142,64 @@ export function Conversation() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-64px)] sm:h-[calc(100dvh-80px)] bg-gray-50">
-      {/* Header */}
-      <ConversationHeader
-        user={otherUser}
-        onBack={() => navigate('/messages')}
-        onViewProfile={() => navigate(`/member/${otherUser.id}`)}
-      />
+    <>
+      {/* 
+        Container Facebook Messenger style:
+        - Mobile: Position fixe, plein écran (header principal caché)
+        - Desktop: Relatif dans le layout, avec calcul de hauteur
+      */}
+      <div className="fixed inset-0 flex flex-col bg-gray-50 z-10 lg:relative lg:inset-auto lg:z-auto lg:h-[calc(100vh-80px)]">
+        {/* Header - Toujours visible en haut */}
+        <div className="shrink-0 z-10">
+          <ConversationHeader
+            user={otherUser}
+            onBack={() => navigate('/messages')}
+            onViewProfile={() => navigate(`/member/${otherUser.id}`)}
+          />
+        </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
-        {messages.length === 0 ? (
-          <div className="text-center text-gray-500 py-8">
-            Envoyez votre premier message !
+        {/* Messages - Zone scrollable au milieu */}
+        <div 
+          className="flex-1 overflow-y-auto overscroll-contain min-h-0"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
+          <div className="p-4 space-y-3">
+            {messages.length === 0 ? (
+              <div className="text-center text-gray-500 py-8">
+                Envoyez votre premier message !
+              </div>
+            ) : (
+              messages.map((msg, index) => {
+                const isOwn = msg.sender_id === user?.id;
+                const showAvatar =
+                  !isOwn &&
+                  (index === 0 || messages[index - 1].sender_id !== msg.sender_id);
+
+                return (
+                  <MessageBubble
+                    key={msg.id}
+                    message={msg}
+                    isOwn={isOwn}
+                    showAvatar={showAvatar}
+                    senderProfile={!isOwn ? otherUser : undefined}
+                  />
+                );
+              })
+            )}
+            <div ref={messagesEndRef} />
           </div>
-        ) : (
-          messages.map((msg, index) => {
-            const isOwn = msg.sender_id === user?.id;
-            const showAvatar =
-              !isOwn &&
-              (index === 0 || messages[index - 1].sender_id !== msg.sender_id);
+        </div>
 
-            return (
-              <MessageBubble
-                key={msg.id}
-                message={msg}
-                isOwn={isOwn}
-                showAvatar={showAvatar}
-                senderProfile={!isOwn ? otherUser : undefined}
-              />
-            );
-          })
-        )}
-        <div ref={messagesEndRef} />
+        {/* Input - Toujours fixé en bas */}
+        <div className="shrink-0">
+          <MessageInput
+            value={newMessage}
+            onChange={setNewMessage}
+            onSend={handleSend}
+            sending={sending}
+          />
+        </div>
       </div>
-
-      {/* Input */}
-      <MessageInput
-        value={newMessage}
-        onChange={setNewMessage}
-        onSend={handleSend}
-        sending={sending}
-      />
-    </div>
+    </>
   );
 }

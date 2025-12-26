@@ -76,5 +76,8 @@ GUIDE_IMPORT_USERS.md
 
 # Local
 
+# Claude Code session files
+.claude/
+
 # Design files
 design.json

@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
 import DashboardLayout from './layouts/DashboardLayout';
+import Home from './pages/Home';
 import Directory from './pages/Directory';
 import Promo from './pages/Promo';
 import Events from './pages/Events';
@@ -30,6 +31,11 @@ function App() {
           <Route path="/onboarding" element={<Onboarding />} />
           
           <Route element={<ProtectedRoute />}>
+            <Route path="/home" element={
+              <DashboardLayout>
+                <Home />
+              </DashboardLayout>
+            } />
             <Route path="/dashboard" element={
               <DashboardLayout>
                 <Directory />
@@ -81,7 +87,7 @@ function App() {
                 <EditProfile />
               </DashboardLayout>
             } />
-             <Route path="/" element={<Navigate to="/dashboard" replace />} />
+             <Route path="/" element={<Navigate to="/home" replace />} />
           </Route>
           </Routes>
         </PasswordChangeGuard>

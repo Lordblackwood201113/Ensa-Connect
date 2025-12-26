@@ -10,7 +10,7 @@ import { Avatar } from '../ui/Avatar';
 import { supabase } from '../../lib/supabase';
 import { format, isToday, isYesterday } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { cn, MODAL_FOOTER_CLASSES } from '../../lib/utils';
+import { cn } from '../../lib/utils';
 import { Link } from 'react-router-dom';
 
 interface PromoGroupChatProps {
@@ -334,14 +334,14 @@ export function PromoGroupChat({ promotion }: PromoGroupChatProps) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input - Fixed at bottom, never scrolls */}
-      <div className={cn(MODAL_FOOTER_CLASSES, "sticky bottom-0")}>
+      {/* Input - Fixed at bottom with safe area */}
+      <div className="bg-white border-t border-gray-100 px-3 py-2 sm:px-4 sm:py-3 safe-area-inset-bottom shrink-0">
         <MentionInput
           value={newMessage}
           onChange={setNewMessage}
           onSubmit={handleSend}
           connections={promoMembers}
-          placeholder="Message au groupe... (@ pour mentionner)"
+          placeholder="Aa"
           loading={sending}
         />
       </div>

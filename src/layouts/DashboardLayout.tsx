@@ -1,10 +1,11 @@
 import { type ReactNode, useState, useEffect, useRef } from 'react';
 import { Sidebar } from '../components/layout/Sidebar';
+import { MobileBottomNav } from '../components/layout/MobileBottomNav';
 import { Avatar } from '../components/ui/Avatar';
 import { Input } from '../components/ui/Input';
 import { NotificationDropdown } from '../components/notifications/NotificationDropdown';
 import { useAuth } from '../context/AuthContext';
-import { Search, Menu, X } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import type { Profile } from '../types';
@@ -121,20 +122,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         "ml-0"
       )}>
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 h-14 sm:h-16 px-3 sm:px-4 lg:px-8 flex items-center justify-between sticky top-0 z-20">
+        {/* Header - Hidden on mobile for conversation pages (they have their own header) */}
+        <header className={cn(
+          "bg-white border-b border-gray-200 h-14 sm:h-16 px-3 sm:px-4 lg:px-8 flex items-center justify-between sticky top-0 z-20",
+          location.pathname.startsWith('/messages/') && "hidden lg:flex"
+        )}>
           
-          {/* Left section - Menu, Logo & Search */}
+          {/* Left section - Logo & Search */}
           <div className="flex items-center gap-2 flex-1">
-            {/* Mobile Menu Button */}
+            {/* Mobile Logo - Clickable to go home */}
             <button
-              className="lg:hidden p-2 -ml-1 text-gray-500 hover:text-brand-black hover:bg-gray-100 rounded-full transition-colors touch-manipulation"
-              onClick={() => setIsMobileMenuOpen(true)}
+              onClick={() => navigate('/home')}
+              className="lg:hidden flex items-center gap-2 hover:opacity-80 active:scale-95 transition-all touch-manipulation"
             >
-              <Menu className="w-5 h-5" />
-            </button>
-
-            {/* Mobile Logo */}
-            <div className="lg:hidden flex items-center gap-2">
               <img
                 src="/logo.jpeg"
                 alt="ENSA Connect"
@@ -143,7 +143,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <span className="font-bold text-base text-brand-black hidden xs:inline">
                 ENSA Connect
               </span>
-            </div>
+            </button>
 
             {/* Search Bar - Desktop always visible, Mobile expandable */}
             <div 
@@ -248,9 +248,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </header>
         
         {/* Main Content */}
-        <main className="p-4 sm:p-6 lg:p-8 flex-1 overflow-auto">
+        {/* Main Content - No padding on conversation pages for full-screen chat */}
+        <main className={cn(
+          "flex-1 overflow-auto",
+          location.pathname.startsWith('/messages/') 
+            ? "p-0 pb-0" 
+            : "p-4 sm:p-6 lg:p-8 pb-20 lg:pb-8"
+        )}>
           {children}
         </main>
+
+        {/* Mobile Bottom Navigation */}
+        <MobileBottomNav 
+          isMenuOpen={isMobileMenuOpen}
+          onMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+        />
       </div>
     </div>
   );

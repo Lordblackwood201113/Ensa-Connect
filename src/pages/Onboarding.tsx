@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { calculateCompletionScore } from '../lib/utils';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
@@ -25,6 +26,25 @@ export default function Onboarding() {
 
     setLoading(true);
     try {
+      // Récupérer les infos du profil existant pour le calcul
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, avatar_url, cover_url, linkedin_url, phone')
+        .eq('id', user.id)
+        .single();
+
+      // Calculer le score de complétion avec toutes les données disponibles
+      const profileDataForScore = {
+        first_name: existingProfile?.first_name || user.user_metadata?.first_name,
+        last_name: existingProfile?.last_name || user.user_metadata?.last_name,
+        ...formData,
+        avatar_url: existingProfile?.avatar_url,
+        cover_url: existingProfile?.cover_url,
+        linkedin_url: existingProfile?.linkedin_url,
+        phone: existingProfile?.phone,
+      };
+      const completionScore = calculateCompletionScore(profileDataForScore, 0, 0);
+
       // On utilise upsert pour gérer les deux cas (création ou mise à jour)
       // car selon la méthode de connexion, le profil peut ne pas exister
       const { error } = await supabase
@@ -32,7 +52,7 @@ export default function Onboarding() {
         .upsert({
           id: user.id,
           ...formData,
-          completion_score: 50,
+          completion_score: completionScore,
           onboarding_completed: true,
           updated_at: new Date().toISOString(),
         });

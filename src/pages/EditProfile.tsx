@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { calculateCompletionScore } from '../lib/utils';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
@@ -91,11 +92,19 @@ export default function EditProfile() {
 
     setLoading(true);
     try {
+      // Calculer le score de complétion
+      const completionScore = calculateCompletionScore(
+        formData,
+        experiences.length,
+        educations.length
+      );
+
       const { error } = await supabase
         .from('profiles')
         .upsert({
           id: user.id,
           ...formData,
+          completion_score: completionScore,
           updated_at: new Date().toISOString(),
         });
 

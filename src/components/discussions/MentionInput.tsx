@@ -245,43 +245,57 @@ export function MentionInput({
         </div>
       )}
 
-      {/* Input Container */}
+      {/* Input Container - Facebook/LinkedIn style */}
       <div className="flex items-end gap-2">
         <div className="flex-1 relative">
-          <textarea
-            ref={inputRef}
-            value={value}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            onFocus={() => setIsInputFocused(true)}
-            onBlur={() => setIsInputFocused(false)}
-            placeholder={placeholder}
-            disabled={disabled}
-            className="flex-1 resize-none rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent min-h-[44px] max-h-32 w-full disabled:opacity-50 disabled:cursor-not-allowed"
-            rows={1}
-          />
+          <div className="flex items-end bg-gray-100 rounded-3xl transition-all duration-200 focus-within:bg-gray-50 focus-within:ring-2 focus-within:ring-brand-primary/20">
+            <textarea
+              ref={inputRef}
+              value={value}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              onFocus={() => setIsInputFocused(true)}
+              onBlur={() => setIsInputFocused(false)}
+              placeholder={placeholder}
+              disabled={disabled}
+              className={cn(
+                "flex-1 bg-transparent resize-none px-4 py-2.5 text-[15px] leading-[22px]",
+                "placeholder:text-gray-400 focus:outline-none",
+                "min-h-[42px] max-h-[120px] w-full",
+                "scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent",
+                "disabled:opacity-50 disabled:cursor-not-allowed"
+              )}
+              rows={1}
+            />
+          </div>
           {/* Hint pour les mentions */}
           {isInputFocused && !value && connections.length > 0 && (
-            <div className="absolute right-4 top-3 text-xs text-gray-400 hidden sm:block">
-              Tapez @ pour mentionner
+            <div className="absolute right-4 top-2.5 text-xs text-gray-400 hidden sm:block pointer-events-none">
+              @ pour mentionner
             </div>
           )}
         </div>
+        {/* Send Button - Integrated style like Messenger */}
         <button
           type="button"
           onClick={onSubmit}
           disabled={loading || !value.trim() || disabled}
           className={cn(
-            'rounded-full h-11 w-11 shrink-0 flex items-center justify-center transition-colors',
+            "shrink-0 flex items-center justify-center transition-all duration-200",
+            "w-10 h-10 rounded-full",
             value.trim() && !loading && !disabled
-              ? 'bg-brand-black text-white hover:bg-gray-800'
-              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              ? "bg-brand-primary text-white hover:bg-brand-primary/90 active:scale-95"
+              : "text-gray-300 cursor-default"
           )}
+          aria-label="Envoyer"
         >
           {loading ? (
             <Loader2 className="w-5 h-5 animate-spin" />
           ) : (
-            <Send className="w-5 h-5" />
+            <Send className={cn(
+              "w-5 h-5 transition-transform duration-200",
+              value.trim() && !disabled && "translate-x-0.5"
+            )} />
           )}
         </button>
       </div>

@@ -1,6 +1,19 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Users, GraduationCap, Calendar, Briefcase, MessageCircle, UserPlus, LogOut, ChevronLeft, ChevronRight, X, Mail } from 'lucide-react';
+import { 
+  House, 
+  UsersThree, 
+  GraduationCap, 
+  CalendarDots, 
+  Briefcase, 
+  ChatTeardropDots, 
+  UserPlus, 
+  SignOut, 
+  CaretLeft, 
+  CaretRight, 
+  X,
+  EnvelopeSimple
+} from '@phosphor-icons/react';
 import { cn } from '../../lib/utils';
 import { supabase } from '../../lib/supabase';
 import { connectionService } from '../../lib/connections';
@@ -69,13 +82,14 @@ export function Sidebar({ isCollapsed, toggleSidebar, isMobileOpen = false, clos
   };
 
   const navItems = [
-    { icon: Users, label: 'Annuaire', path: '/dashboard' },
+    { icon: House, label: 'Accueil', path: '/home' },
+    { icon: UsersThree, label: 'Annuaire', path: '/dashboard' },
     { icon: GraduationCap, label: 'Ma Promo', path: '/promo' },
-    { icon: Calendar, label: 'Événements', path: '/events' },
+    { icon: CalendarDots, label: 'Événements', path: '/events' },
     { icon: Briefcase, label: 'Jobs', path: '/jobs' },
-    { icon: MessageCircle, label: 'Discussions', path: '/discussions' },
+    { icon: ChatTeardropDots, label: 'Discussions', path: '/discussions' },
     { icon: UserPlus, label: 'Connexions', path: '/connections', badge: pendingCount },
-    { icon: Mail, label: 'Messages', path: '/messages', badge: unreadMessages },
+    { icon: EnvelopeSimple, label: 'Messages', path: '/messages', badge: unreadMessages },
   ];
 
   const handleLogout = async () => {
@@ -114,7 +128,7 @@ export function Sidebar({ isCollapsed, toggleSidebar, isMobileOpen = false, clos
             onClick={closeMobileSidebar}
             className="lg:hidden text-gray-500 hover:text-brand-black"
         >
-            <X className="w-5 h-5" />
+            <X size={20} weight="bold" />
         </button>
       </div>
       
@@ -123,7 +137,7 @@ export function Sidebar({ isCollapsed, toggleSidebar, isMobileOpen = false, clos
         onClick={toggleSidebar}
         className="absolute -right-3 top-20 bg-white border border-gray-200 rounded-full p-1 text-gray-500 hover:text-brand-black shadow-sm z-30 hidden lg:block"
       >
-        {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+        {isCollapsed ? <CaretRight size={16} weight="bold" /> : <CaretLeft size={16} weight="bold" />}
       </button>
       
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
@@ -131,7 +145,7 @@ export function Sidebar({ isCollapsed, toggleSidebar, isMobileOpen = false, clos
           <NavLink
             key={item.path}
             to={item.path}
-            onClick={() => closeMobileSidebar?.()} // Close menu on navigation on mobile
+            onClick={() => closeMobileSidebar?.()}
             className={({ isActive }) =>
               cn(
                 'flex items-center gap-3 px-4 py-3 rounded-xl transition-colors relative',
@@ -143,19 +157,23 @@ export function Sidebar({ isCollapsed, toggleSidebar, isMobileOpen = false, clos
             }
             title={isCollapsed ? item.label : undefined}
           >
-            <div className="relative">
-              <item.icon className="w-5 h-5 shrink-0" />
-              {item.badge !== undefined && item.badge > 0 && isCollapsed && (
-                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-brand-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                  {item.badge > 9 ? '9+' : item.badge}
-                </span>
-              )}
-            </div>
-            <span className={cn(isCollapsed && "lg:hidden")}>{item.label}</span>
-            {item.badge !== undefined && item.badge > 0 && !isCollapsed && (
-              <span className="ml-auto bg-brand-primary text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                {item.badge > 99 ? '99+' : item.badge}
-              </span>
+            {({ isActive }) => (
+              <>
+                <div className="relative">
+                  <item.icon size={20} weight={isActive ? 'duotone' : 'regular'} className="shrink-0" />
+                  {item.badge !== undefined && item.badge > 0 && isCollapsed && (
+                    <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-brand-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                      {item.badge > 9 ? '9+' : item.badge}
+                    </span>
+                  )}
+                </div>
+                <span className={cn(isCollapsed && "lg:hidden")}>{item.label}</span>
+                {item.badge !== undefined && item.badge > 0 && !isCollapsed && (
+                  <span className="ml-auto bg-brand-primary text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                    {item.badge > 99 ? '99+' : item.badge}
+                  </span>
+                )}
+              </>
             )}
           </NavLink>
         ))}
@@ -170,7 +188,7 @@ export function Sidebar({ isCollapsed, toggleSidebar, isMobileOpen = false, clos
           )}
           title={isCollapsed ? "Se déconnecter" : undefined}
         >
-          <LogOut className="w-5 h-5 shrink-0" />
+          <SignOut size={20} weight="duotone" className="shrink-0" />
           <span className={cn(isCollapsed && "lg:hidden")}>Se déconnecter</span>
         </button>
       </div>
