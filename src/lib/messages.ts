@@ -157,6 +157,20 @@ export const messageService = {
         .select()
         .single();
 
+      // Si erreur de contrainte unique, la conversation existe déjà - la récupérer
+      if (error && error.code === '23505') {
+        const { data: existingConv } = await supabase
+          .from('conversations')
+          .select('*')
+          .eq('participant_1', p1)
+          .eq('participant_2', p2)
+          .single();
+
+        if (existingConv) {
+          return { data: existingConv as Conversation, error: null };
+        }
+      }
+
       if (error) throw error;
       return { data: data as Conversation, error: null };
     } catch (error) {
