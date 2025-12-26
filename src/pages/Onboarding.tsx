@@ -63,7 +63,7 @@ export default function Onboarding() {
       await refreshProfile();
       
       // Redirection explicite
-      navigate('/dashboard');
+      navigate('/home');
     } catch (error: any) {
       console.error('Error updating profile:', error);
       alert(`Une erreur est survenue lors de la mise à jour du profil: ${error.message || error}`);
