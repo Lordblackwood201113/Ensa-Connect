@@ -7,6 +7,7 @@ import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { Avatar } from '../components/ui/Avatar';
 import { Modal } from '../components/ui/Modal';
+import { MentionInput } from '../components/admin/MentionInput';
 import { cn } from '../lib/utils';
 import type { JoinRequest, Profile, Job, Discussion } from '../types';
 import {
@@ -50,7 +51,8 @@ export default function Admin() {
   const [rejectReason, setRejectReason] = useState('');
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [isMassMessageModalOpen, setIsMassMessageModalOpen] = useState(false);
-  const [massMessageData, setMassMessageData] = useState({ subject: '', content: '', targetPromotion: '' });
+  const [massMessageData, setMassMessageData] = useState({ subject: '', content: '', targetText: '' });
+  const [messageTargets, setMessageTargets] = useState<{ type: 'all' | 'promotion'; value: string }[]>([]);
 
   // Check if user is super user
   useEffect(() => {
@@ -299,24 +301,54 @@ export default function Admin() {
       return;
     }
 
+    if (messageTargets.length === 0) {
+      alert('Veuillez mentionner au moins une cible (@tous ou @ensaX)');
+      return;
+    }
+
     try {
-      // Get target users
-      let query = supabase.from('profiles').select('id');
-      if (massMessageData.targetPromotion) {
-        query = query.eq('promotion', massMessageData.targetPromotion);
+      // Build query based on targets
+      let targetUserIds: string[] = [];
+
+      // Check if @tous is in targets
+      const hasAll = messageTargets.some(t => t.type === 'all');
+
+      if (hasAll) {
+        // Get all users
+        const { data: allUsers } = await supabase.from('profiles').select('id');
+        if (allUsers) {
+          targetUserIds = allUsers.map(u => u.id);
+        }
+      } else {
+        // Get users from specific promotions
+        const promotions = messageTargets
+          .filter(t => t.type === 'promotion')
+          .map(t => t.value);
+
+        if (promotions.length > 0) {
+          const { data: promoUsers } = await supabase
+            .from('profiles')
+            .select('id')
+            .in('promotion', promotions);
+
+          if (promoUsers) {
+            targetUserIds = promoUsers.map(u => u.id);
+          }
+        }
       }
 
-      const { data: targetUsers } = await query;
+      // Remove duplicates
+      targetUserIds = [...new Set(targetUserIds)];
 
-      if (!targetUsers || targetUsers.length === 0) {
-        alert('Aucun utilisateur trouvé');
+      if (targetUserIds.length === 0) {
+        alert('Aucun utilisateur trouvé pour les cibles spécifiées');
         return;
       }
 
-      // Create notifications for all users
-      const notifications = targetUsers.map((u) => ({
-        user_id: u.id,
-        type: 'new_message' as const,
+      // Create notifications for all target users
+      const notifications = targetUserIds.map((userId) => ({
+        user_id: userId,
+        type: 'admin_message' as const,
         title: massMessageData.subject,
         message: massMessageData.content.substring(0, 200),
         link: '/messages',
@@ -326,9 +358,14 @@ export default function Admin() {
 
       await supabase.from('notifications').insert(notifications);
 
-      alert(`Message envoyé à ${targetUsers.length} utilisateur(s)`);
-      setIsMassMessageModalOpen(false);
-      setMassMessageData({ subject: '', content: '', targetPromotion: '' });
+      // Show target summary
+      const targetSummary = hasAll
+        ? 'tous les utilisateurs'
+        : messageTargets.filter(t => t.type === 'promotion').map(t => t.value).join(', ');
+
+      alert(`Message envoyé à ${targetUserIds.length} utilisateur(s) (${targetSummary})`);
+      setMassMessageData({ subject: '', content: '', targetText: '' });
+      setMessageTargets([]);
     } catch (error: any) {
       alert(`Erreur: ${error.message}`);
     }
@@ -668,13 +705,26 @@ export default function Admin() {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Promotion cible (optionnel)
+                      Destinataires
                     </label>
-                    <Input
-                      placeholder="Ex: ENSA 53 (laisser vide pour tous)"
-                      value={massMessageData.targetPromotion}
-                      onChange={(e) => setMassMessageData({ ...massMessageData, targetPromotion: e.target.value })}
+                    <MentionInput
+                      value={massMessageData.targetText}
+                      onChange={(value) => setMassMessageData({ ...massMessageData, targetText: value })}
+                      onTargetChange={setMessageTargets}
+                      placeholder="Tapez @tous ou @ensa53 pour cibler..."
                     />
+                    {messageTargets.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {messageTargets.map((target, idx) => (
+                          <span
+                            key={idx}
+                            className="inline-flex items-center gap-1 px-2 py-1 bg-brand-primary/10 text-brand-primary text-xs font-medium rounded-lg"
+                          >
+                            {target.type === 'all' ? 'Tous' : target.value}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -699,9 +749,9 @@ export default function Admin() {
                       onChange={(e) => setMassMessageData({ ...massMessageData, content: e.target.value })}
                     />
                   </div>
-                  <Button onClick={handleSendMassMessage} className="gap-2">
+                  <Button onClick={handleSendMassMessage} className="gap-2" disabled={messageTargets.length === 0}>
                     <PaperPlaneTilt size={18} weight="bold" />
-                    Envoyer à tous
+                    Envoyer aux destinataires
                   </Button>
                 </div>
               </Card>
