@@ -84,7 +84,7 @@ export function Sidebar({ isCollapsed, toggleSidebar, isMobileOpen = false, clos
     { icon: UsersThree, label: 'Annuaire', path: '/dashboard' },
     { icon: GraduationCap, label: 'Ma Promo', path: '/promo' },
     { icon: CalendarDots, label: 'Événements', path: '/events' },
-    { icon: Briefcase, label: 'Jobs', path: '/jobs' },
+    { icon: Briefcase, label: 'Emploi', path: '/jobs' },
     { icon: ChatTeardropDots, label: 'Discussions', path: '/discussions' },
     { icon: UserPlus, label: 'Connexions', path: '/connections', badge: pendingCount },
     { icon: EnvelopeSimple, label: 'Messages', path: '/messages', badge: unreadMessages },

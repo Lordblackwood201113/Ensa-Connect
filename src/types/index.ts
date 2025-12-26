@@ -61,6 +61,9 @@ export interface Job {
   description: string;
   requirements: string | null;
   apply_link: string | null;
+  image_url: string | null;
+  application_deadline: string | null;
+  application_email: string | null;
   poster_id: string;
   poster?: Profile;
 }

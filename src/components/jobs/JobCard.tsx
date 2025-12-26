@@ -1,4 +1,5 @@
-import { MapPin, Clock, ExternalLink, Edit2, Trash2, Briefcase, ChevronRight } from 'lucide-react';
+import { MapPin, Clock, ExternalLink, Edit2, Trash2, ChevronRight } from 'lucide-react';
+import { Briefcase, CalendarBlank, Warning } from '@phosphor-icons/react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Avatar } from '../../components/ui/Avatar';
@@ -27,17 +28,57 @@ export function JobCard({ job, onViewDetail, onEdit, onDelete }: JobCardProps) {
   const timeAgo = formatDistanceToNow(new Date(job.created_at));
   const isOwner = user?.id === job.poster_id;
 
+  // Calculate deadline status
+  const getDeadlineStatus = () => {
+    if (!job.application_deadline) return null;
+    const deadline = new Date(job.application_deadline);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const daysLeft = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (daysLeft < 0) return { text: 'Expirée', urgent: true, expired: true };
+    if (daysLeft === 0) return { text: "Aujourd'hui", urgent: true, expired: false };
+    if (daysLeft <= 3) return { text: `${daysLeft}j restants`, urgent: true, expired: false };
+    if (daysLeft <= 7) return { text: `${daysLeft}j restants`, urgent: false, expired: false };
+    return null;
+  };
+
+  const deadlineStatus = getDeadlineStatus();
+
   return (
     <Card
       className="group p-4 sm:p-6 hover:shadow-md hover:border-brand-primary/50 transition-all duration-200 flex flex-col h-full relative active:scale-[0.98] touch-manipulation cursor-pointer"
       onClick={() => onViewDetail(job)}
     >
+      {/* Deadline Badge - Top right */}
+      {deadlineStatus && (
+        <div className={`absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold ${
+          deadlineStatus.expired
+            ? 'bg-gray-100 text-gray-500'
+            : deadlineStatus.urgent
+              ? 'bg-red-100 text-red-600'
+              : 'bg-orange-100 text-orange-600'
+        }`}>
+          {deadlineStatus.urgent && !deadlineStatus.expired && <Warning size={12} weight="fill" />}
+          <CalendarBlank size={12} weight="fill" />
+          {deadlineStatus.text}
+        </div>
+      )}
+
       {/* Header - Mobile optimized */}
       <div className="flex items-start gap-3 mb-3">
-        {/* Company Logo Placeholder */}
-        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gray-100 flex items-center justify-center shrink-0 group-hover:bg-brand-primary/10 transition-colors">
-          <Briefcase className="w-6 h-6 text-gray-400 group-hover:text-brand-primary transition-colors" />
-        </div>
+        {/* Company Logo or Placeholder */}
+        {job.image_url ? (
+          <img
+            src={job.image_url}
+            alt={job.company}
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover shrink-0 border border-gray-100"
+          />
+        ) : (
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gray-100 flex items-center justify-center shrink-0 group-hover:bg-brand-primary/10 transition-colors">
+            <Briefcase size={24} className="text-gray-400 group-hover:text-brand-primary transition-colors" />
+          </div>
+        )}
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">

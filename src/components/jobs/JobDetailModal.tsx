@@ -1,4 +1,5 @@
-import { MapPin, Clock, ExternalLink, Building, Briefcase } from 'lucide-react';
+import { MapPin, Clock, ExternalLink, Building } from 'lucide-react';
+import { Briefcase, CalendarBlank, EnvelopeSimple, Warning } from '@phosphor-icons/react';
 import { Modal } from '../ui/Modal';
 import { Avatar } from '../ui/Avatar';
 import { Button } from '../ui/Button';
@@ -26,16 +27,41 @@ export function JobDetailModal({ job, isOpen, onClose }: JobDetailModalProps) {
 
   const timeAgo = formatDistanceToNow(new Date(job.created_at));
 
+  // Calculate deadline info
+  const getDeadlineInfo = () => {
+    if (!job.application_deadline) return null;
+    const deadline = new Date(job.application_deadline);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const daysLeft = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const formattedDate = deadline.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    if (daysLeft < 0) return { text: `Expirée le ${formattedDate}`, urgent: false, expired: true };
+    if (daysLeft === 0) return { text: `Expire aujourd'hui`, urgent: true, expired: false };
+    if (daysLeft <= 3) return { text: `Expire dans ${daysLeft} jour${daysLeft > 1 ? 's' : ''} (${formattedDate})`, urgent: true, expired: false };
+    return { text: `Date limite: ${formattedDate}`, urgent: false, expired: false };
+  };
+
+  const deadlineInfo = getDeadlineInfo();
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Détails de l'offre" size="lg">
       <div className="p-4 sm:p-6 lg:p-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
           <div className="flex items-start gap-4">
-            {/* Company logo placeholder */}
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
-              <Briefcase className="w-7 h-7 text-gray-400" />
-            </div>
+            {/* Company logo or placeholder */}
+            {job.image_url ? (
+              <img
+                src={job.image_url}
+                alt={job.company}
+                className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-cover shrink-0 border border-gray-100"
+              />
+            ) : (
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+                <Briefcase size={28} className="text-gray-400" />
+              </div>
+            )}
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-brand-black mb-1">
                 {job.title}
@@ -61,6 +87,19 @@ export function JobDetailModal({ job, isOpen, onClose }: JobDetailModalProps) {
             <Clock className="w-4 h-4 text-gray-400" />
             Publié {timeAgo}
           </div>
+          {deadlineInfo && (
+            <div className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium ${
+              deadlineInfo.expired
+                ? 'bg-gray-100 text-gray-500'
+                : deadlineInfo.urgent
+                  ? 'bg-red-50 text-red-600'
+                  : 'bg-blue-50 text-blue-600'
+            }`}>
+              {deadlineInfo.urgent && !deadlineInfo.expired && <Warning size={16} weight="fill" />}
+              <CalendarBlank size={16} weight="fill" />
+              {deadlineInfo.text}
+            </div>
+          )}
         </div>
 
         {/* Content */}
@@ -86,41 +125,60 @@ export function JobDetailModal({ job, isOpen, onClose }: JobDetailModalProps) {
           )}
         </div>
 
-        {/* Footer - Poster info & Apply button */}
-        <div className="bg-gray-50 rounded-xl p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <Link 
-            to={`/member/${job.poster?.id}`} 
-            onClick={onClose}
-            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
-          >
-            <Avatar 
-              src={job.poster?.avatar_url || undefined} 
-              alt={job.poster?.last_name || 'Recruteur'} 
-              size="md" 
-            />
-            <div>
-              <p className="text-xs text-gray-500 uppercase font-semibold tracking-wide">
-                Publié par
-              </p>
-              <p className="font-bold text-brand-black">
-                {job.poster?.first_name} {job.poster?.last_name}
-              </p>
+        {/* Footer - Poster info & Apply options */}
+        <div className="bg-gray-50 rounded-xl p-4 sm:p-6 space-y-4">
+          {/* Apply options */}
+          {(job.apply_link || job.application_email) && (
+            <div className="flex flex-col sm:flex-row gap-3">
+              {job.apply_link && (
+                <a
+                  href={job.apply_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1"
+                >
+                  <Button className="gap-2 w-full">
+                    Postuler en ligne
+                    <ExternalLink className="w-4 h-4" />
+                  </Button>
+                </a>
+              )}
+              {job.application_email && (
+                <a
+                  href={`mailto:${job.application_email}?subject=Candidature: ${encodeURIComponent(job.title)}`}
+                  className="flex-1"
+                >
+                  <Button variant={job.apply_link ? 'outline' : 'primary'} className="gap-2 w-full">
+                    <EnvelopeSimple size={18} weight="duotone" />
+                    Envoyer un email
+                  </Button>
+                </a>
+              )}
             </div>
-          </Link>
-
-          {job.apply_link && (
-            <a 
-              href={job.apply_link} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="w-full sm:w-auto"
-            >
-              <Button className="gap-2 w-full sm:w-auto">
-                Postuler maintenant
-                <ExternalLink className="w-4 h-4" />
-              </Button>
-            </a>
           )}
+
+          {/* Poster info */}
+          <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+            <Link
+              to={`/member/${job.poster?.id}`}
+              onClick={onClose}
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            >
+              <Avatar
+                src={job.poster?.avatar_url || undefined}
+                alt={job.poster?.last_name || 'Recruteur'}
+                size="md"
+              />
+              <div>
+                <p className="text-xs text-gray-500 uppercase font-semibold tracking-wide">
+                  Publié par
+                </p>
+                <p className="font-bold text-brand-black">
+                  {job.poster?.first_name} {job.poster?.last_name}
+                </p>
+              </div>
+            </Link>
+          </div>
         </div>
       </div>
     </Modal>
