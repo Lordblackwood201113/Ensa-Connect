@@ -118,7 +118,7 @@ export function NotificationDropdown() {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'discussion_reply':
-        return <MessageCircle className="w-4 h-4 text-brand-purple" />;
+        return <MessageCircle className="w-4 h-4 text-brand-primary" />;
       default:
         return <Bell className="w-4 h-4 text-gray-500" />;
     }
@@ -132,7 +132,7 @@ export function NotificationDropdown() {
       >
         <Bell className="w-5 h-5 text-gray-600" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 w-5 h-5 bg-brand-lime text-brand-black text-xs font-bold rounded-full flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 w-5 h-5 bg-brand-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -145,7 +145,7 @@ export function NotificationDropdown() {
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="text-xs text-brand-purple hover:underline font-medium flex items-center gap-1"
+                className="text-xs text-brand-primary hover:underline font-medium flex items-center gap-1"
               >
                 <Check className="w-3 h-3" />
                 Tout marquer comme lu
@@ -167,7 +167,7 @@ export function NotificationDropdown() {
                   key={notification.id}
                   onClick={() => handleNotificationClick(notification)}
                   className={`w-full text-left p-4 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-b-0 ${
-                    !notification.is_read ? 'bg-brand-lime/5' : ''
+                    !notification.is_read ? 'bg-brand-primary/5' : ''
                   }`}
                 >
                   <div className="flex gap-3">
@@ -197,7 +197,7 @@ export function NotificationDropdown() {
                     </div>
                     {!notification.is_read && (
                       <div className="shrink-0">
-                        <div className="w-2 h-2 bg-brand-lime rounded-full" />
+                        <div className="w-2 h-2 bg-brand-primary rounded-full" />
                       </div>
                     )}
                   </div>

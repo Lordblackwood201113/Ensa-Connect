@@ -130,9 +130,9 @@ export function ConnectionButton({
   // Mode icône seule avec style discret
   if (!showLabel) {
     const iconStyles = {
-      none: 'text-gray-500 hover:text-brand-lime hover:border-brand-lime hover:bg-brand-lime/5',
+      none: 'text-gray-500 hover:text-brand-primary hover:border-brand-primary hover:bg-brand-primary/5',
       pending_sent: 'text-amber-500 border-amber-200 bg-amber-50',
-      pending_received: 'text-brand-purple hover:text-brand-purple hover:border-brand-purple hover:bg-brand-purple/5',
+      pending_received: 'text-brand-primary hover:text-brand-primary hover:border-brand-primary hover:bg-brand-primary/5',
       connected: 'text-green-500 border-green-200 bg-green-50'
     };
 

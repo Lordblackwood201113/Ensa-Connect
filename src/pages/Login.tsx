@@ -43,13 +43,13 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex font-sans selection:bg-brand-lime/30">
+    <div className="min-h-screen bg-white flex font-sans selection:bg-brand-primary/30">
       {/* Left Side - Branding & Visuals */}
-      <div className="hidden lg:flex lg:w-1/2 bg-[#0A0A0A] relative flex-col justify-between p-16 text-white overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-brand-dark relative flex-col justify-between p-16 text-white overflow-hidden">
         {/* Ambient Background */}
         <div className="absolute inset-0 opacity-40 pointer-events-none">
-            <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-brand-lime rounded-full blur-[160px] mix-blend-screen animate-pulse duration-[4s]" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-brand-purple rounded-full blur-[140px] opacity-60" />
+            <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-brand-primary rounded-full blur-[160px] mix-blend-screen animate-pulse duration-[4s]" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-brand-secondary rounded-full blur-[140px] opacity-60" />
         </div>
 
         {/* Glass Texture */}
@@ -57,7 +57,7 @@ export default function Login() {
 
         <div className="relative z-10">
             <div className="flex items-center gap-3 mb-16">
-                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg shadow-brand-lime/20">
+                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg shadow-brand-primary/20">
                     <img src="/logo.jpeg" alt="Logo" className="w-full h-full rounded-xl object-cover" />
                 </div>
                 <span className="text-2xl font-bold tracking-tight text-white">ENSA Connect</span>
@@ -66,7 +66,7 @@ export default function Login() {
             <div className="max-w-2xl">
                 <h1 className="text-7xl font-extrabold leading-[1.1] mb-8 tracking-tight">
                     Votre réseau,<br/>
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-lime to-white">votre avenir.</span>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-white">votre avenir.</span>
                 </h1>
                 <p className="text-xl text-gray-400 max-w-lg leading-relaxed font-light mb-12">
                     Rejoignez la communauté exclusive des anciens élèves de l'ENSA. Partagez, collaborez et évoluez ensemble.
@@ -74,19 +74,19 @@ export default function Login() {
 
                 <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-3 text-gray-300">
-                        <div className="w-8 h-8 rounded-full bg-brand-lime/10 flex items-center justify-center text-brand-lime">
+                        <div className="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary">
                             <CheckCircle2 className="w-5 h-5" />
                         </div>
                         <span>Accès exclusif à l'annuaire des alumni</span>
                     </div>
                     <div className="flex items-center gap-3 text-gray-300">
-                        <div className="w-8 h-8 rounded-full bg-brand-lime/10 flex items-center justify-center text-brand-lime">
+                        <div className="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary">
                             <CheckCircle2 className="w-5 h-5" />
                         </div>
                         <span>Offres d'emploi et stages ciblés</span>
                     </div>
                     <div className="flex items-center gap-3 text-gray-300">
-                        <div className="w-8 h-8 rounded-full bg-brand-lime/10 flex items-center justify-center text-brand-lime">
+                        <div className="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary">
                             <CheckCircle2 className="w-5 h-5" />
                         </div>
                         <span>Événements networking et afterworks</span>
@@ -99,13 +99,13 @@ export default function Login() {
       {/* Right Side - Login Form */}
       <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-6 sm:p-12 bg-gray-50/50 relative">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-lime/5 rounded-full blur-[100px]" />
+             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-primary/5 rounded-full blur-[100px]" />
         </div>
 
         <div className="w-full max-w-md bg-white p-6 sm:p-10 rounded-[24px] shadow-xl shadow-brand-black/5 border border-white relative z-10">
             {/* Mobile Logo */}
             <div className="lg:hidden flex flex-col items-center mb-8">
-                <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-lg shadow-brand-lime/20 mb-4 border border-gray-100">
+                <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-lg shadow-brand-primary/20 mb-4 border border-gray-100">
                     <img src="/logo.jpeg" alt="ENSA Connect" className="w-full h-full rounded-2xl object-cover" />
                 </div>
                 <span className="text-xl font-bold text-brand-black">ENSA Connect</span>
@@ -137,7 +137,7 @@ export default function Login() {
                         placeholder="nom@exemple.com" 
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="bg-gray-50 border-gray-100 focus:bg-white focus:border-brand-lime/50 rounded-xl h-12"
+                        className="bg-gray-50 border-gray-100 focus:bg-white focus:border-brand-primary/50 rounded-xl h-12"
                     />
                 </div>
 
@@ -149,11 +149,11 @@ export default function Login() {
                         placeholder="••••••••" 
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="bg-gray-50 border-gray-100 focus:bg-white focus:border-brand-lime/50 rounded-xl h-12"
+                        className="bg-gray-50 border-gray-100 focus:bg-white focus:border-brand-primary/50 rounded-xl h-12"
                     />
                 </div>
 
-                <Button type="submit" className="w-full h-14 text-lg font-bold shadow-xl shadow-brand-black/10 hover:shadow-2xl hover:shadow-brand-lime/20" disabled={loading}>
+                <Button type="submit" className="w-full h-14 text-lg font-bold shadow-xl shadow-brand-black/10 hover:shadow-2xl hover:shadow-brand-primary/20" disabled={loading}>
                     {loading ? 'Chargement...' : 'Se connecter'}
                     {!loading && <ArrowRight className="w-5 h-5 ml-2" />}
                 </Button>

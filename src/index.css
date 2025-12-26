@@ -133,7 +133,7 @@ select {
 
 /* Improved focus states for accessibility */
 :focus-visible {
-  outline: 2px solid #8B5CF6;
+  outline: 2px solid #5FAA8D;
   outline-offset: 2px;
 }
 
@@ -175,12 +175,20 @@ select {
 }
 
 @theme {
-  --color-brand-lime: #A9D18E;
-  --color-brand-purple: #8B5CF6;
-  --color-brand-black: #111827;
-  
+  /* ENSA Color Palette - Based on institutional branding */
+  --color-brand-primary: #5FAA8D;    /* Mint green - main accent */
+  --color-brand-secondary: #3D5A4C;  /* Dark forest green - secondary */
+  --color-brand-dark: #2C4A3E;       /* Very dark green - strong elements */
+  --color-brand-black: #0A0A0A;      /* Pure black - text */
+  --color-brand-gray: #808080;       /* Neutral gray */
+  --color-brand-light: #F8F8F8;      /* Off-white - backgrounds */
+
+  /* Legacy aliases for backward compatibility */
+  --color-brand-lime: #5FAA8D;       /* Maps to primary */
+  --color-brand-purple: #3D5A4C;     /* Maps to secondary (for gradients) */
+
   --font-sans: "Inter", sans-serif;
-  
+
   --radius-card: 24px;
   --radius-pill: 9999px;
 }
@@ -230,7 +238,7 @@ select {
   margin-left: -100%;
   margin-top: -100%;
   border-radius: 45px;
-  background-color: #A9D18E;
+  background-color: #5FAA8D;
   animation: pulse-ring 2.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
   opacity: 0.6;
 }
@@ -243,7 +251,7 @@ select {
   display: block;
   width: 100%;
   height: 100%;
-  background-color: #A9D18E;
+  background-color: #5FAA8D;
   border-radius: 50%;
   border: 2px solid white;
   box-shadow: 0 0 8px rgba(0,0,0,0.3);
@@ -258,15 +266,15 @@ select {
 .pulsing-marker-cluster div {
   width: 40px;
   height: 40px;
-  background-color: #A9D18E;
-  color: #111827;
+  background-color: #5FAA8D;
+  color: #0A0A0A;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
   border: 3px solid white;
-  box-shadow: 0 4px 12px rgba(169, 209, 142, 0.4);
+  box-shadow: 0 4px 12px rgba(95, 170, 141, 0.4);
 }
 
 /* Custom Cluster Marker Styles */
@@ -279,17 +287,17 @@ select {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: linear-gradient(135deg, #A9D18E 0%, #8BC34A 100%);
-  color: #111827;
+  background: linear-gradient(135deg, #5FAA8D 0%, #3D5A4C 100%);
+  color: #F8F8F8;
   font-weight: 700;
   border: 3px solid white;
-  box-shadow: 0 4px 15px rgba(169, 209, 142, 0.5), 0 2px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 15px rgba(95, 170, 141, 0.5), 0 2px 6px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
 }
 
 .cluster-icon:hover {
   transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(169, 209, 142, 0.6), 0 4px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 20px rgba(95, 170, 141, 0.6), 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .cluster-icon span {

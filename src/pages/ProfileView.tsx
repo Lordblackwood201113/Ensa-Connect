@@ -100,7 +100,7 @@ export default function ProfileView() {
   if (!profile) return (
     <div className="text-center py-10 px-4">
       <p className="text-gray-500">Profil non trouvé</p>
-      <Link to="/dashboard" className="text-brand-purple mt-2 inline-block">
+      <Link to="/dashboard" className="text-brand-primary mt-2 inline-block">
         Retour à l'annuaire
       </Link>
     </div>
@@ -142,7 +142,7 @@ export default function ProfileView() {
                 <img src={profile.cover_url} alt="Cover" className="w-full h-full object-cover" />
             ) : (
                 <div className="w-full h-full bg-brand-black/10 flex items-center justify-center text-gray-400">
-                    <div className="w-full h-full bg-gradient-to-r from-brand-lime to-brand-purple opacity-20"></div>
+                    <div className="w-full h-full bg-gradient-to-r from-brand-primary to-brand-secondary opacity-20"></div>
                 </div>
             )}
             {/* Mobile back button over cover */}
@@ -180,7 +180,7 @@ export default function ProfileView() {
                      {connectionStatus === 'connected' && (
                        <button
                          onClick={handleStartConversation}
-                         className="p-2.5 rounded-full border border-gray-200 text-gray-500 hover:text-brand-purple hover:border-brand-purple hover:bg-brand-purple/5 transition-all touch-manipulation active:scale-95"
+                         className="p-2.5 rounded-full border border-gray-200 text-gray-500 hover:text-brand-primary hover:border-brand-primary hover:bg-brand-primary/5 transition-all touch-manipulation active:scale-95"
                          title="Envoyer un message"
                        >
                          <MessageCircle className="w-5 h-5" />
@@ -209,7 +209,7 @@ export default function ProfileView() {
                                     setCopiedEmail(true);
                                 }
                             }}
-                            className="p-2.5 rounded-full border border-gray-200 text-gray-500 hover:text-brand-purple hover:border-brand-purple hover:bg-brand-purple/5 transition-all touch-manipulation active:scale-95"
+                            className="p-2.5 rounded-full border border-gray-200 text-gray-500 hover:text-brand-primary hover:border-brand-primary hover:bg-brand-primary/5 transition-all touch-manipulation active:scale-95"
                             title={copiedEmail ? "Email copié !" : "Copier l'email"}
                         >
                            {copiedEmail ? (
@@ -244,7 +244,7 @@ export default function ProfileView() {
                     {(profile.phone && (profile.is_phone_visible || isOwnProfile)) && (
                         <a
                             href={`tel:${profile.phone}`}
-                            className="flex items-center gap-1 bg-gray-50 px-2 py-1 sm:bg-transparent sm:px-0 sm:py-0 rounded-full hover:text-brand-purple"
+                            className="flex items-center gap-1 bg-gray-50 px-2 py-1 sm:bg-transparent sm:px-0 sm:py-0 rounded-full hover:text-brand-primary"
                         >
                              <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                              {profile.phone}
@@ -278,14 +278,14 @@ export default function ProfileView() {
                     {/* Experiences */}
                     <section>
                         <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
-                            <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-brand-purple" />
+                            <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-brand-secondary" />
                             Parcours professionnel
                         </h3>
                         {experiences.length > 0 ? (
                             <div className="space-y-4 sm:space-y-6 ml-1 sm:ml-2 border-l-2 border-gray-100 pl-4 sm:pl-8 relative">
                                 {experiences.map((exp) => (
                                     <div key={exp.id} className="relative">
-                                        <div className="absolute -left-[21px] sm:-left-[39px] top-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full border-4 border-white bg-brand-purple"></div>
+                                        <div className="absolute -left-[21px] sm:-left-[39px] top-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full border-4 border-white bg-brand-secondary"></div>
                                         <h4 className="font-bold text-base sm:text-lg">{exp.title}</h4>
                                         <p className="text-gray-700 font-medium text-sm sm:text-base">{exp.company}</p>
                                         <p className="text-xs sm:text-sm text-gray-400 mt-1">
@@ -302,14 +302,14 @@ export default function ProfileView() {
                     {/* Educations */}
                     <section>
                         <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
-                            <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 text-brand-lime" />
+                            <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 text-brand-primary" />
                             Formation académique
                         </h3>
                         {educations.length > 0 ? (
                             <div className="space-y-4 sm:space-y-6 ml-1 sm:ml-2 border-l-2 border-gray-100 pl-4 sm:pl-8 relative">
                                 {educations.map((edu) => (
                                     <div key={edu.id} className="relative">
-                                        <div className="absolute -left-[21px] sm:-left-[39px] top-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full border-4 border-white bg-brand-lime"></div>
+                                        <div className="absolute -left-[21px] sm:-left-[39px] top-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full border-4 border-white bg-brand-primary"></div>
                                         <h4 className="font-bold text-base sm:text-lg">{edu.school}</h4>
                                         <p className="text-gray-700 text-sm sm:text-base">{edu.degree} {edu.field_of_study ? `• ${edu.field_of_study}` : ''}</p>
                                         <p className="text-xs sm:text-sm text-gray-400 mt-1">

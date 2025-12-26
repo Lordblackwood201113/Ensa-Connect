@@ -220,7 +220,7 @@ export function PromoGroupChat({ promotion }: PromoGroupChatProps) {
     return (
       <div className="flex flex-col h-full bg-gray-50">
         <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-brand-lime" />
+          <Loader2 className="w-8 h-8 animate-spin text-brand-primary" />
         </div>
       </div>
     );
@@ -291,7 +291,7 @@ export function PromoGroupChat({ promotion }: PromoGroupChatProps) {
                         {!isOwn && (
                           <Link
                             to={`/member/${msg.sender?.id}`}
-                            className="text-xs font-medium text-brand-lime hover:underline block mb-1"
+                            className="text-xs font-medium text-brand-primary hover:underline block mb-1"
                           >
                             {senderName}
                           </Link>

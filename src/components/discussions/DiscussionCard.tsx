@@ -16,7 +16,7 @@ export function DiscussionCard({ discussion, onClick }: DiscussionCardProps) {
 
   return (
     <Card
-      className="group p-3 xs:p-3.5 sm:p-6 cursor-pointer hover:shadow-md hover:border-brand-lime/50 transition-all duration-200 active:scale-[0.98] active:bg-gray-50/50 touch-manipulation select-none w-full max-w-full overflow-hidden"
+      className="group p-3 xs:p-3.5 sm:p-6 cursor-pointer hover:shadow-md hover:border-brand-primary/50 transition-all duration-200 active:scale-[0.98] active:bg-gray-50/50 touch-manipulation select-none w-full max-w-full overflow-hidden"
       onClick={onClick}
     >
       <div className="flex items-start gap-2 xs:gap-2.5 sm:gap-4 min-w-0">
@@ -57,7 +57,7 @@ export function DiscussionCard({ discussion, onClick }: DiscussionCardProps) {
           </div>
 
           {/* Title */}
-          <h3 className="text-[14px] xs:text-[15px] sm:text-lg font-bold text-brand-black mb-0.5 xs:mb-1 sm:mb-2 line-clamp-2 leading-tight group-hover:text-brand-lime group-active:text-brand-lime transition-colors break-words">
+          <h3 className="text-[14px] xs:text-[15px] sm:text-lg font-bold text-brand-black mb-0.5 xs:mb-1 sm:mb-2 line-clamp-2 leading-tight group-hover:text-brand-primary group-active:text-brand-primary transition-colors break-words">
             {discussion.title}
           </h3>
 
@@ -87,7 +87,7 @@ export function DiscussionCard({ discussion, onClick }: DiscussionCardProps) {
         </div>
 
         {/* Arrow indicator - Hidden on mobile to save space */}
-        <ChevronRight className="w-4 h-4 xs:w-5 xs:h-5 text-gray-300 shrink-0 flex-shrink-0 self-center group-hover:text-brand-lime group-active:text-brand-lime group-hover:translate-x-0.5 transition-all hidden sm:block" />
+        <ChevronRight className="w-4 h-4 xs:w-5 xs:h-5 text-gray-300 shrink-0 flex-shrink-0 self-center group-hover:text-brand-primary group-active:text-brand-primary group-hover:translate-x-0.5 transition-all hidden sm:block" />
       </div>
     </Card>
   );

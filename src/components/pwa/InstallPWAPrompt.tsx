@@ -69,7 +69,7 @@ export function InstallPWAPrompt() {
           {/* Content */}
           <div className="text-center">
             {/* App Icon */}
-            <div className="w-20 h-20 mx-auto mb-4 rounded-2xl overflow-hidden shadow-lg border-2 border-brand-lime/30">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-2xl overflow-hidden shadow-lg border-2 border-brand-primary/30">
               <img
                 src="/logo-192.png"
                 alt="ENSA Connect"
@@ -143,15 +143,15 @@ export function InstallPWAPrompt() {
             <div className="mt-6 pt-5 border-t border-gray-100">
               <div className="flex justify-center gap-6 text-xs text-gray-400">
                 <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 bg-brand-lime rounded-full" />
+                  <span className="w-2 h-2 bg-brand-primary rounded-full" />
                   Accès rapide
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 bg-brand-lime rounded-full" />
+                  <span className="w-2 h-2 bg-brand-primary rounded-full" />
                   Hors ligne
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 bg-brand-lime rounded-full" />
+                  <span className="w-2 h-2 bg-brand-primary rounded-full" />
                   Notifications
                 </span>
               </div>

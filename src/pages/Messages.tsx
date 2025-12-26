@@ -64,7 +64,7 @@ export function Messages() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-brand-purple" />
+        <Loader2 className="w-8 h-8 animate-spin text-brand-primary" />
       </div>
     );
   }
@@ -86,7 +86,7 @@ export function Messages() {
               placeholder="Rechercher une conversation..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-gray-100 rounded-xl border-0 focus:ring-2 focus:ring-brand-purple text-sm"
+              className="w-full pl-10 pr-4 py-3 bg-gray-100 rounded-xl border-0 focus:ring-2 focus:ring-brand-primary text-sm"
             />
           </div>
         )}

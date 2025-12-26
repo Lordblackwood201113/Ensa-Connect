@@ -40,8 +40,8 @@ export function EventDetailModal({ event, isOpen, onClose }: EventDetailModalPro
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-brand-lime/30 to-brand-lime/10">
-            <CalendarIcon className="w-12 h-12 sm:w-16 sm:h-16 text-brand-lime" />
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-brand-primary/30 to-brand-primary/10">
+            <CalendarIcon className="w-12 h-12 sm:w-16 sm:h-16 text-brand-primary" />
           </div>
         )}
 
@@ -74,8 +74,8 @@ export function EventDetailModal({ event, isOpen, onClose }: EventDetailModalPro
         {/* Date & Location cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
           <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-3 sm:p-4">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-brand-purple/10 flex items-center justify-center shrink-0">
-              <CalendarIcon className="w-5 h-5 sm:w-6 sm:h-6 text-brand-purple" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-brand-primary/10 flex items-center justify-center shrink-0">
+              <CalendarIcon className="w-5 h-5 sm:w-6 sm:h-6 text-brand-primary" />
             </div>
             <div className="min-w-0">
               <p className="text-xs text-gray-500 uppercase font-medium">Date</p>
@@ -86,7 +86,7 @@ export function EventDetailModal({ event, isOpen, onClose }: EventDetailModalPro
           </div>
 
           <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-3 sm:p-4">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-brand-lime/20 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-brand-primary/20 flex items-center justify-center shrink-0">
               <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
             </div>
             <div className="min-w-0">

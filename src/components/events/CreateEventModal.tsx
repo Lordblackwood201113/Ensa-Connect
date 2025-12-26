@@ -148,7 +148,7 @@ export function CreateEventModal({ isOpen, onClose, onSuccess, eventToEdit }: Cr
           </label>
           <textarea
             rows={4}
-            className="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-brand-purple resize-none text-base sm:text-sm touch-manipulation"
+            className="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-brand-primary resize-none text-base sm:text-sm touch-manipulation"
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             placeholder="Détails de l'événement..."

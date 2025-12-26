@@ -144,7 +144,7 @@ export default function Directory() {
       )}>
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-start">
           <select
-            className="w-full sm:flex-1 bg-gray-50 border border-gray-200 rounded-xl min-h-[48px] py-3 sm:py-2 px-3 sm:px-4 focus:outline-none focus:ring-2 focus:ring-brand-lime text-sm touch-manipulation text-[16px] appearance-none leading-tight"
+            className="w-full sm:flex-1 bg-gray-50 border border-gray-200 rounded-xl min-h-[48px] py-3 sm:py-2 px-3 sm:px-4 focus:outline-none focus:ring-2 focus:ring-brand-primary text-sm touch-manipulation text-[16px] appearance-none leading-tight"
             value={filters.promotion}
             onChange={(e) => setFilters({...filters, promotion: e.target.value})}
           >
@@ -153,7 +153,7 @@ export default function Directory() {
           </select>
 
           <select
-            className="w-full sm:flex-1 bg-gray-50 border border-gray-200 rounded-xl min-h-[48px] py-3 sm:py-2 px-3 sm:px-4 focus:outline-none focus:ring-2 focus:ring-brand-lime text-sm touch-manipulation text-[16px] appearance-none leading-tight"
+            className="w-full sm:flex-1 bg-gray-50 border border-gray-200 rounded-xl min-h-[48px] py-3 sm:py-2 px-3 sm:px-4 focus:outline-none focus:ring-2 focus:ring-brand-primary text-sm touch-manipulation text-[16px] appearance-none leading-tight"
             value={filters.city}
             onChange={(e) => setFilters({...filters, city: e.target.value})}
           >
@@ -162,7 +162,7 @@ export default function Directory() {
           </select>
 
           <select
-            className="w-full sm:flex-1 bg-gray-50 border border-gray-200 rounded-xl min-h-[48px] py-3 sm:py-2 px-3 sm:px-4 focus:outline-none focus:ring-2 focus:ring-brand-lime text-sm touch-manipulation text-[16px] appearance-none leading-tight"
+            className="w-full sm:flex-1 bg-gray-50 border border-gray-200 rounded-xl min-h-[48px] py-3 sm:py-2 px-3 sm:px-4 focus:outline-none focus:ring-2 focus:ring-brand-primary text-sm touch-manipulation text-[16px] appearance-none leading-tight"
             value={filters.study_track}
             onChange={(e) => setFilters({...filters, study_track: e.target.value})}
           >

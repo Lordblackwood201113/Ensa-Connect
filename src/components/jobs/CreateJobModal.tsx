@@ -126,7 +126,7 @@ export function CreateJobModal({ isOpen, onClose, onSuccess, jobToEdit }: Create
             </label>
             <select
               required
-              className="w-full bg-white border border-gray-200 rounded-xl min-h-[48px] py-3 sm:py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-brand-purple text-base sm:text-sm touch-manipulation appearance-none leading-tight"
+              className="w-full bg-white border border-gray-200 rounded-xl min-h-[48px] py-3 sm:py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-brand-primary text-base sm:text-sm touch-manipulation appearance-none leading-tight"
               value={formData.contract_type}
               onChange={(e) => setFormData({ ...formData, contract_type: e.target.value })}
             >
@@ -155,7 +155,7 @@ export function CreateJobModal({ isOpen, onClose, onSuccess, jobToEdit }: Create
               types: ["(cities)"],
             }}
             placeholder="Ville, Pays..."
-            className="w-full bg-white border border-gray-200 rounded-xl py-3 sm:py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-brand-purple text-base sm:text-sm touch-manipulation"
+            className="w-full bg-white border border-gray-200 rounded-xl py-3 sm:py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-brand-primary text-base sm:text-sm touch-manipulation"
             defaultValue={formData.location}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, location: e.target.value })}
           />
@@ -169,7 +169,7 @@ export function CreateJobModal({ isOpen, onClose, onSuccess, jobToEdit }: Create
           <textarea
             rows={4}
             required
-            className="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-brand-purple resize-none text-base sm:text-sm touch-manipulation"
+            className="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-brand-primary resize-none text-base sm:text-sm touch-manipulation"
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             placeholder="Missions, responsabilités..."

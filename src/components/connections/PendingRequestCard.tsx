@@ -48,7 +48,7 @@ export function PendingRequestCard({ connection, onUpdate }: PendingRequestCardP
 
   return (
     <Card
-      className="group p-3 xs:p-4 hover:shadow-md hover:border-brand-lime/50 transition-all duration-200 active:scale-[0.99] cursor-pointer touch-manipulation overflow-hidden w-full max-w-full"
+      className="group p-3 xs:p-4 hover:shadow-md hover:border-brand-primary/50 transition-all duration-200 active:scale-[0.99] cursor-pointer touch-manipulation overflow-hidden w-full max-w-full"
       onClick={handleCardClick}
     >
       <div className="flex items-center gap-2 xs:gap-3 min-w-0">
@@ -60,12 +60,12 @@ export function PendingRequestCard({ connection, onUpdate }: PendingRequestCardP
             size="md"
             className="w-10 h-10 xs:w-12 xs:h-12"
           />
-          <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 xs:w-3 xs:h-3 bg-brand-lime rounded-full border-2 border-white" />
+          <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 xs:w-3 xs:h-3 bg-brand-primary rounded-full border-2 border-white" />
         </div>
 
         {/* Info */}
         <div className="flex-1 min-w-0 overflow-hidden">
-          <h3 className="font-semibold text-brand-black text-sm xs:text-base group-hover:text-brand-lime transition-colors truncate">
+          <h3 className="font-semibold text-brand-black text-sm xs:text-base group-hover:text-brand-primary transition-colors truncate">
             {requester.first_name} {requester.last_name}
           </h3>
           <p className="text-xs xs:text-sm text-gray-500 line-clamp-2 break-words">
@@ -104,7 +104,7 @@ export function PendingRequestCard({ connection, onUpdate }: PendingRequestCardP
           </button>
 
           {/* Arrow for profile navigation hint */}
-          <ChevronRight className="w-4 h-4 text-gray-300 hidden sm:block group-hover:text-brand-lime group-hover:translate-x-0.5 transition-all shrink-0" />
+          <ChevronRight className="w-4 h-4 text-gray-300 hidden sm:block group-hover:text-brand-primary group-hover:translate-x-0.5 transition-all shrink-0" />
         </div>
       </div>
     </Card>

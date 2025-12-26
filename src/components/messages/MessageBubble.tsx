@@ -42,7 +42,7 @@ export function MessageBubble({ message, isOwn, showAvatar, senderProfile }: Pro
         className={cn(
           'max-w-[75%] px-4 py-2.5 rounded-2xl',
           isOwn
-            ? 'bg-brand-purple text-white rounded-br-md'
+            ? 'bg-brand-secondary text-white rounded-br-md'
             : 'bg-white text-gray-900 rounded-bl-md shadow-sm'
         )}
       >
@@ -52,7 +52,7 @@ export function MessageBubble({ message, isOwn, showAvatar, senderProfile }: Pro
         <span
           className={cn(
             'text-[10px] mt-1 block text-right',
-            isOwn ? 'text-purple-200' : 'text-gray-400'
+            isOwn ? 'text-white/60' : 'text-gray-400'
           )}
         >
           {formatTime(message.created_at)}

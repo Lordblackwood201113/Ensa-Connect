@@ -106,7 +106,7 @@ export default function Connections() {
           <p className="text-xs xs:text-sm text-gray-500 hidden sm:block">Gérez votre réseau professionnel</p>
         </div>
         {/* Connection count badge - mobile */}
-        <div className="sm:hidden bg-brand-lime/20 text-brand-black px-2 xs:px-2.5 py-1 rounded-full text-[10px] xs:text-xs font-medium whitespace-nowrap shrink-0">
+        <div className="sm:hidden bg-brand-primary/20 text-brand-secondary px-2 xs:px-2.5 py-1 rounded-full text-[10px] xs:text-xs font-medium whitespace-nowrap shrink-0">
           {connections.length} connexion{connections.length !== 1 ? 's' : ''}
         </div>
       </div>
@@ -131,7 +131,7 @@ export default function Connections() {
               activeTab === tab.id
                 ? "bg-white/20"
                 : tab.highlight
-                  ? "bg-brand-purple text-white"
+                  ? "bg-brand-primary text-white"
                   : "bg-gray-200"
             )}>
               {tab.count}
@@ -149,7 +149,7 @@ export default function Connections() {
             placeholder="Rechercher..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white border border-gray-200 rounded-xl py-2.5 xs:py-3 pl-9 xs:pl-10 pr-9 xs:pr-10 text-[16px] focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all touch-manipulation"
+            className="w-full bg-white border border-gray-200 rounded-xl py-2.5 xs:py-3 pl-9 xs:pl-10 pr-9 xs:pr-10 text-[16px] focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all touch-manipulation"
           />
           {searchQuery && (
             <button

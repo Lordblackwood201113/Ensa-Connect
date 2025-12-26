@@ -12,7 +12,7 @@ interface MemberCardProps {
 export function MemberCard({ profile }: MemberCardProps) {
   return (
     <Link to={`/member/${profile.id}`} className="block group">
-      <Card className="p-4 sm:p-6 transition-all duration-200 hover:shadow-md hover:border-brand-lime/50 active:scale-[0.98] touch-manipulation">
+      <Card className="p-4 sm:p-6 transition-all duration-200 hover:shadow-md hover:border-brand-primary/50 active:scale-[0.98] touch-manipulation">
         {/* Mobile: Horizontal layout / Desktop: Vertical layout */}
         <div className="flex items-center gap-4 sm:flex-col sm:items-center sm:text-center">
           {/* Avatar */}
@@ -38,7 +38,7 @@ export function MemberCard({ profile }: MemberCardProps) {
             </div>
 
             {/* Name */}
-            <h3 className="font-bold text-brand-black text-base sm:text-lg truncate group-hover:text-brand-lime transition-colors">
+            <h3 className="font-bold text-brand-black text-base sm:text-lg truncate group-hover:text-brand-primary transition-colors">
               {profile.first_name} {profile.last_name}
             </h3>
 
@@ -65,7 +65,7 @@ export function MemberCard({ profile }: MemberCardProps) {
           </div>
 
           {/* Mobile: Arrow indicator */}
-          <ChevronRight className="w-5 h-5 text-gray-300 shrink-0 sm:hidden group-hover:text-brand-lime transition-colors" />
+          <ChevronRight className="w-5 h-5 text-gray-300 shrink-0 sm:hidden group-hover:text-brand-primary transition-colors" />
         </div>
       </Card>
     </Link>

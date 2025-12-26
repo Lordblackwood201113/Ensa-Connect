@@ -85,7 +85,7 @@ export function ForcePasswordChangeModal({ onSuccess }: ForcePasswordChangeModal
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="bg-gradient-to-r from-brand-purple to-brand-purple/80 p-6 text-white">
+        <div className="bg-gradient-to-r from-brand-secondary to-brand-secondary/80 p-6 text-white">
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 bg-white/20 rounded-xl">
               <ShieldCheck className="w-6 h-6" />

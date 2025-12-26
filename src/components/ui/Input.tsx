@@ -13,7 +13,7 @@ const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>
           'py-3 px-4 text-base',
           'sm:py-2.5 sm:text-sm',
           // Focus states
-          'focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent',
+          'focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent',
           // Touch optimization
           'touch-manipulation',
           // Prevent zoom on iOS when focusing

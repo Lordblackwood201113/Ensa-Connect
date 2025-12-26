@@ -75,7 +75,7 @@ export function CreateDiscussionModal({ isOpen, onClose, onSuccess }: CreateDisc
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             placeholder="Ex: Comment trouver un stage en data science ?"
-            className="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-[16px] focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all touch-manipulation"
+            className="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-[16px] focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all touch-manipulation"
             autoComplete="off"
             enterKeyHint="next"
           />
@@ -91,7 +91,7 @@ export function CreateDiscussionModal({ isOpen, onClose, onSuccess }: CreateDisc
           <textarea
             rows={5}
             required
-            className="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-[16px] focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent resize-none touch-manipulation transition-all"
+            className="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-[16px] focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent resize-none touch-manipulation transition-all"
             value={formData.content}
             onChange={(e) => setFormData({ ...formData, content: e.target.value })}
             placeholder="Décrivez votre question ou demande en détail..."

@@ -276,7 +276,7 @@ export default function EditProfile() {
                                     type="number"
                                     min="1"
                                     max="70"
-                                    className="w-full bg-white border border-gray-200 rounded-xl py-3 sm:py-2.5 pl-16 pr-4 text-[16px] focus:outline-none focus:ring-2 focus:ring-brand-purple touch-manipulation"
+                                    className="w-full bg-white border border-gray-200 rounded-xl py-3 sm:py-2.5 pl-16 pr-4 text-[16px] focus:outline-none focus:ring-2 focus:ring-brand-primary touch-manipulation"
                                     placeholder="53"
                                     value={formData.promotion ? formData.promotion.replace('ENSA ', '') : ''}
                                     onChange={(e) => {
@@ -293,7 +293,7 @@ export default function EditProfile() {
                         <div>
                             <label className="block text-sm font-medium mb-2">Filière</label>
                             <select
-                                className="w-full bg-white border border-gray-200 rounded-xl min-h-[48px] py-3 sm:py-2.5 px-4 text-[16px] focus:outline-none focus:ring-2 focus:ring-brand-purple touch-manipulation appearance-none leading-tight"
+                                className="w-full bg-white border border-gray-200 rounded-xl min-h-[48px] py-3 sm:py-2.5 px-4 text-[16px] focus:outline-none focus:ring-2 focus:ring-brand-primary touch-manipulation appearance-none leading-tight"
                                 value={formData.study_track}
                                 onChange={(e) => setFormData({ ...formData, study_track: e.target.value })}
                             >
@@ -324,7 +324,7 @@ export default function EditProfile() {
                                     types: ["(cities)"],
                                 }}
                                 placeholder="Rechercher une ville..."
-                                className="w-full bg-white border border-gray-200 rounded-xl py-3 sm:py-2.5 px-4 text-[16px] focus:outline-none focus:ring-2 focus:ring-brand-purple touch-manipulation"
+                                className="w-full bg-white border border-gray-200 rounded-xl py-3 sm:py-2.5 px-4 text-[16px] focus:outline-none focus:ring-2 focus:ring-brand-primary touch-manipulation"
                                 defaultValue={formData.city}
                                 onChange={(e: any) => setFormData({ ...formData, city: e.target.value })}
                             />
@@ -379,7 +379,7 @@ export default function EditProfile() {
                                     type="checkbox" 
                                     checked={formData.is_phone_visible}
                                     onChange={(e) => setFormData({ ...formData, is_phone_visible: e.target.checked })}
-                                    className="w-4 h-4 rounded border-gray-300 text-brand-purple focus:ring-brand-purple"
+                                    className="w-4 h-4 rounded border-gray-300 text-brand-primary focus:ring-brand-primary"
                                 />
                                 <span className="text-sm font-medium text-gray-700">Visible par les autres membres</span>
                              </label>
@@ -522,8 +522,8 @@ export default function EditProfile() {
         {/* Password Change Section */}
         <Card className="p-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-full bg-brand-purple/10 flex items-center justify-center">
-              <Lock className="w-5 h-5 text-brand-purple" />
+            <div className="w-10 h-10 rounded-full bg-brand-primary/10 flex items-center justify-center">
+              <Lock className="w-5 h-5 text-brand-primary" />
             </div>
             <div>
               <h3 className="text-lg font-bold">Modifier le mot de passe</h3>

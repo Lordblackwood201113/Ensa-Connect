@@ -41,7 +41,7 @@ export function ConnectionCard({
 
   return (
     <Card
-      className="group p-3 xs:p-4 hover:shadow-md hover:border-brand-lime/50 transition-all duration-200 active:scale-[0.99] active:bg-gray-50/50 cursor-pointer touch-manipulation overflow-hidden w-full max-w-full"
+      className="group p-3 xs:p-4 hover:shadow-md hover:border-brand-primary/50 transition-all duration-200 active:scale-[0.99] active:bg-gray-50/50 cursor-pointer touch-manipulation overflow-hidden w-full max-w-full"
       onClick={handleCardClick}
     >
       <div className="flex items-center gap-2 xs:gap-3 min-w-0">
@@ -55,7 +55,7 @@ export function ConnectionCard({
 
         {/* Info */}
         <div className="flex-1 min-w-0 overflow-hidden">
-          <h3 className="font-semibold text-brand-black text-sm xs:text-base group-hover:text-brand-lime transition-colors truncate">
+          <h3 className="font-semibold text-brand-black text-sm xs:text-base group-hover:text-brand-primary transition-colors truncate">
             {profile.first_name} {profile.last_name}
           </h3>
 
@@ -93,7 +93,7 @@ export function ConnectionCard({
           {showActions && (
             <button
               onClick={handleMessage}
-              className="p-1.5 xs:p-2 text-gray-300 hover:text-brand-purple hover:bg-brand-purple/10 active:bg-brand-purple/20 rounded-full transition-colors touch-manipulation shrink-0"
+              className="p-1.5 xs:p-2 text-gray-300 hover:text-brand-primary hover:bg-brand-primary/10 active:bg-brand-primary/20 rounded-full transition-colors touch-manipulation shrink-0"
               title="Envoyer un message"
             >
               <MessageCircle className="w-4 h-4" />
@@ -108,7 +108,7 @@ export function ConnectionCard({
               <UserMinus className="w-4 h-4" />
             </button>
           )}
-          <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-brand-lime group-hover:translate-x-0.5 transition-all shrink-0 hidden sm:block" />
+          <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-brand-primary group-hover:translate-x-0.5 transition-all shrink-0 hidden sm:block" />
         </div>
       </div>
     </Card>

@@ -47,8 +47,8 @@ scripts/
 GUIDE_IMPORT_USERS.md
 
 # Captures d'écran / images de démo
-*.JPG
-*.jpg
+#*.JPG
+#*.jpg
 *.jpeg
 *.PNG
 *.png

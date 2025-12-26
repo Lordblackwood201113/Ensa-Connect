@@ -29,22 +29,22 @@ export function JobCard({ job, onViewDetail, onEdit, onDelete }: JobCardProps) {
 
   return (
     <Card
-      className="group p-4 sm:p-6 hover:shadow-md hover:border-brand-lime/50 transition-all duration-200 flex flex-col h-full relative active:scale-[0.98] touch-manipulation cursor-pointer"
+      className="group p-4 sm:p-6 hover:shadow-md hover:border-brand-primary/50 transition-all duration-200 flex flex-col h-full relative active:scale-[0.98] touch-manipulation cursor-pointer"
       onClick={() => onViewDetail(job)}
     >
       {/* Header - Mobile optimized */}
       <div className="flex items-start gap-3 mb-3">
         {/* Company Logo Placeholder */}
-        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gray-100 flex items-center justify-center shrink-0 group-hover:bg-brand-lime/10 transition-colors">
-          <Briefcase className="w-6 h-6 text-gray-400 group-hover:text-brand-lime transition-colors" />
+        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gray-100 flex items-center justify-center shrink-0 group-hover:bg-brand-primary/10 transition-colors">
+          <Briefcase className="w-6 h-6 text-gray-400 group-hover:text-brand-primary transition-colors" />
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="font-bold text-brand-black text-base sm:text-lg line-clamp-2 leading-tight group-hover:text-brand-lime transition-colors">
+            <h3 className="font-bold text-brand-black text-base sm:text-lg line-clamp-2 leading-tight group-hover:text-brand-primary transition-colors">
               {job.title}
             </h3>
-            <ChevronRight className="w-5 h-5 text-gray-300 shrink-0 sm:hidden group-hover:text-brand-lime transition-colors" />
+            <ChevronRight className="w-5 h-5 text-gray-300 shrink-0 sm:hidden group-hover:text-brand-primary transition-colors" />
           </div>
           <p className="text-gray-600 font-medium text-sm truncate">{job.company}</p>
         </div>

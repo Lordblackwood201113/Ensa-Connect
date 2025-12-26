@@ -146,14 +146,14 @@ export function Sidebar({ isCollapsed, toggleSidebar, isMobileOpen = false, clos
             <div className="relative">
               <item.icon className="w-5 h-5 shrink-0" />
               {item.badge !== undefined && item.badge > 0 && isCollapsed && (
-                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-brand-lime text-brand-black text-[10px] font-bold rounded-full flex items-center justify-center">
+                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-brand-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                   {item.badge > 9 ? '9+' : item.badge}
                 </span>
               )}
             </div>
             <span className={cn(isCollapsed && "lg:hidden")}>{item.label}</span>
             {item.badge !== undefined && item.badge > 0 && !isCollapsed && (
-              <span className="ml-auto bg-brand-lime text-brand-black text-xs font-bold px-2 py-0.5 rounded-full">
+              <span className="ml-auto bg-brand-primary text-white text-xs font-bold px-2 py-0.5 rounded-full">
                 {item.badge > 99 ? '99+' : item.badge}
               </span>
             )}

@@ -212,7 +212,7 @@ export function MentionInput({
               onClick={() => selectSuggestion(suggestion)}
               className={cn(
                 'w-full flex items-center gap-3 px-3 py-2 text-left transition-colors',
-                index === selectedIndex ? 'bg-brand-lime/20' : 'hover:bg-gray-50'
+                index === selectedIndex ? 'bg-brand-primary/20' : 'hover:bg-gray-50'
               )}
             >
               <Avatar
@@ -328,7 +328,7 @@ export function renderContentWithMentions(content: string): React.ReactNode {
     parts.push(
       <span
         key={`mention-${keyIndex++}`}
-        className="text-brand-lime font-medium"
+        className="text-brand-primary font-medium"
       >
         @{displayName}
       </span>

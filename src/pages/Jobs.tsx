@@ -137,7 +137,7 @@ export default function Jobs() {
             showFilters ? "block" : "hidden"
           )}>
             <select
-              className="w-full sm:w-auto bg-gray-50 border border-gray-200 rounded-xl min-h-[48px] py-3 sm:py-2 px-3 sm:px-4 focus:outline-none focus:ring-2 focus:ring-brand-lime text-sm touch-manipulation text-[16px] appearance-none leading-tight"
+              className="w-full sm:w-auto bg-gray-50 border border-gray-200 rounded-xl min-h-[48px] py-3 sm:py-2 px-3 sm:px-4 focus:outline-none focus:ring-2 focus:ring-brand-primary text-sm touch-manipulation text-[16px] appearance-none leading-tight"
               value={contractFilter}
               onChange={(e) => setContractFilter(e.target.value)}
             >

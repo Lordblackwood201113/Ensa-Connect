@@ -20,7 +20,7 @@ export function EventCard({ event, onViewDetail, onEdit, onDelete }: EventCardPr
   
   return (
     <Card
-      className="h-full flex flex-col overflow-hidden p-0 group hover:shadow-lg hover:border-brand-lime/50 transition-all duration-300 relative active:scale-[0.98] touch-manipulation cursor-pointer"
+      className="h-full flex flex-col overflow-hidden p-0 group hover:shadow-lg hover:border-brand-primary/50 transition-all duration-300 relative active:scale-[0.98] touch-manipulation cursor-pointer"
       onClick={() => onViewDetail(event)}
     >
       {/* Image Section - Smaller on mobile */}
@@ -33,14 +33,14 @@ export function EventCard({ event, onViewDetail, onEdit, onDelete }: EventCardPr
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-brand-lime/30 to-brand-lime/10">
-            <Calendar className="w-10 h-10 sm:w-12 sm:h-12 text-brand-lime" />
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-brand-primary/30 to-brand-primary/10">
+            <Calendar className="w-10 h-10 sm:w-12 sm:h-12 text-brand-primary" />
           </div>
         )}
 
         {/* Date Badge - Smaller on mobile */}
         <div className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-white rounded-lg sm:rounded-xl shadow-md overflow-hidden flex flex-col text-center w-12 sm:w-16 z-10 group-hover:shadow-lg transition-shadow">
-          <div className="bg-brand-black text-white text-[10px] sm:text-xs py-0.5 sm:py-1 font-bold uppercase group-hover:bg-brand-lime transition-colors">
+          <div className="bg-brand-black text-white text-[10px] sm:text-xs py-0.5 sm:py-1 font-bold uppercase group-hover:bg-brand-primary transition-colors">
             {eventDate.toLocaleDateString('fr-FR', { month: 'short' })}
           </div>
           <div className="py-1 sm:py-2 font-bold text-lg sm:text-xl text-gray-900">
@@ -60,7 +60,7 @@ export function EventCard({ event, onViewDetail, onEdit, onDelete }: EventCardPr
 
       {/* Content Section */}
       <div className="p-4 sm:p-5 flex-1 flex flex-col">
-        <h3 className="text-base sm:text-xl font-bold text-gray-900 mb-1.5 sm:mb-2 line-clamp-2 leading-tight group-hover:text-brand-lime transition-colors">
+        <h3 className="text-base sm:text-xl font-bold text-gray-900 mb-1.5 sm:mb-2 line-clamp-2 leading-tight group-hover:text-brand-primary transition-colors">
           {event.title}
         </h3>
 
@@ -119,7 +119,7 @@ export function EventCard({ event, onViewDetail, onEdit, onDelete }: EventCardPr
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-gray-400 hover:text-brand-purple hover:bg-brand-purple/5 p-2"
+              className="text-gray-400 hover:text-brand-primary hover:bg-brand-primary/5 p-2"
               onClick={() => onViewDetail(event)}
             >
               <Eye className="w-5 h-5" />
