@@ -1,16 +1,15 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { 
-  House, 
-  UsersThree, 
-  GraduationCap, 
-  CalendarDots, 
-  Briefcase, 
-  ChatTeardropDots, 
-  UserPlus, 
-  SignOut, 
-  CaretLeft, 
-  CaretRight, 
+import {
+  House,
+  UsersThree,
+  GraduationCap,
+  CalendarDots,
+  Briefcase,
+  ChatTeardropDots,
+  UserPlus,
+  CaretLeft,
+  CaretRight,
   X,
   EnvelopeSimple
 } from '@phosphor-icons/react';
@@ -29,7 +28,6 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isCollapsed, toggleSidebar, isMobileOpen = false, closeMobileSidebar }: SidebarProps) {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const [pendingCount, setPendingCount] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
@@ -91,16 +89,6 @@ export function Sidebar({ isCollapsed, toggleSidebar, isMobileOpen = false, clos
     { icon: UserPlus, label: 'Connexions', path: '/connections', badge: pendingCount },
     { icon: EnvelopeSimple, label: 'Messages', path: '/messages', badge: unreadMessages },
   ];
-
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      navigate('/login');
-    }
-  };
 
   return (
     <aside 
@@ -178,20 +166,6 @@ export function Sidebar({ isCollapsed, toggleSidebar, isMobileOpen = false, clos
           </NavLink>
         ))}
       </nav>
-
-      <div className="p-4 border-t border-gray-100">
-        <button
-          onClick={handleLogout}
-          className={cn(
-            "flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-600 hover:bg-red-50 transition-colors font-medium",
-            isCollapsed && "lg:justify-center lg:px-2"
-          )}
-          title={isCollapsed ? "Se déconnecter" : undefined}
-        >
-          <SignOut size={20} weight="duotone" className="shrink-0" />
-          <span className={cn(isCollapsed && "lg:hidden")}>Se déconnecter</span>
-        </button>
-      </div>
     </aside>
   );
 }

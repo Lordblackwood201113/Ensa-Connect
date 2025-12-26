@@ -2,13 +2,11 @@ import { type ReactNode, useState, useEffect, useRef } from 'react';
 import { Sidebar } from '../components/layout/Sidebar';
 import { MobileBottomNav } from '../components/layout/MobileBottomNav';
 import { Avatar } from '../components/ui/Avatar';
-import { Input } from '../components/ui/Input';
 import { NotificationDropdown } from '../components/notifications/NotificationDropdown';
 import { useAuth } from '../context/AuthContext';
-import { Search, X } from 'lucide-react';
+import { User, SignOut } from '@phosphor-icons/react';
 import { supabase } from '../lib/supabase';
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import type { Profile } from '../types';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
 
 interface DashboardLayoutProps {
@@ -19,85 +17,32 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { profile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchParams] = useSearchParams();
-  
-  const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [members, setMembers] = useState<Profile[]>([]);
-  const searchRef = useRef<HTMLDivElement>(null);
+
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
   useEffect(() => {
-    fetchMembers();
     const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
-        setIsSearchExpanded(false);
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
+        setIsProfileDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Sync search term with URL when it changes
-  useEffect(() => {
-    if (location.pathname === '/dashboard') {
-      setSearchTerm(searchParams.get('q') || '');
-    }
-  }, [searchParams, location.pathname]);
-
-  // Close mobile menu on route change
+  // Close mobile menu and dropdowns on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
-    setIsSearchExpanded(false);
+    setIsProfileDropdownOpen(false);
   }, [location.pathname]);
 
-  const fetchMembers = async () => {
-    try {
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .limit(100);
-      if (data) setMembers(data);
-    } catch (error) {
-      console.error('Error fetching members for search:', error);
-    }
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/login');
   };
-
-  const handleSearch = (term: string) => {
-    setSearchTerm(term);
-    setShowSuggestions(true);
-
-    if (location.pathname === '/dashboard') {
-      const params = new URLSearchParams(location.search);
-      if (term) params.set('q', term);
-      else params.delete('q');
-      navigate(`/dashboard?${params.toString()}`, { replace: true });
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      setShowSuggestions(false);
-      setIsSearchExpanded(false);
-      navigate(`/dashboard?q=${searchTerm}`);
-    }
-    if (e.key === 'Escape') {
-      setShowSuggestions(false);
-      setIsSearchExpanded(false);
-    }
-  };
-
-  const suggestions = searchTerm.length > 0 
-    ? members.filter(m => {
-        const fullName = `${m.first_name} ${m.last_name}`.toLowerCase();
-        const company = (m.company || '').toLowerCase();
-        const term = searchTerm.toLowerCase();
-        return fullName.includes(term) || company.includes(term);
-      }).slice(0, 5)
-    : [];
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -128,8 +73,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           location.pathname.startsWith('/messages/') && "hidden lg:flex"
         )}>
           
-          {/* Left section - Logo & Search */}
-          <div className="flex items-center gap-2 flex-1">
+          {/* Left section - Logo */}
+          <div className="flex items-center">
             {/* Mobile Logo - Clickable to go home */}
             <button
               onClick={() => navigate('/home')}
@@ -144,106 +89,58 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 ENSA Connect
               </span>
             </button>
-
-            {/* Search Bar - Desktop always visible, Mobile expandable */}
-            <div 
-              className={cn(
-                "relative transition-all duration-200",
-                // Mobile: Expandable search
-                isSearchExpanded 
-                  ? "fixed inset-x-0 top-0 h-14 bg-white z-50 px-3 flex items-center" 
-                  : "hidden sm:block flex-1 max-w-md lg:max-w-xl"
-              )} 
-              ref={searchRef}
-            >
-              {/* Mobile search close button */}
-              {isSearchExpanded && (
-                <button
-                  className="p-2 mr-2 text-gray-500 hover:text-brand-black"
-                  onClick={() => {
-                    setIsSearchExpanded(false);
-                    setShowSuggestions(false);
-                  }}
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              )}
-              
-              <div className={cn("relative", isSearchExpanded && "flex-1")}>
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input 
-                  className="pl-10 py-2.5 bg-gray-50 border-none w-full" 
-                  placeholder="Rechercher..." 
-                  value={searchTerm}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  onFocus={() => setShowSuggestions(true)}
-                  onKeyDown={handleKeyDown}
-                />
-              </div>
-
-              {/* Suggestions dropdown */}
-              {showSuggestions && suggestions.length > 0 && (
-                <div className={cn(
-                  "absolute left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden",
-                  isSearchExpanded ? "top-full mx-3" : "top-full"
-                )}>
-                  {suggestions.map(member => (
-                    <button
-                      key={member.id}
-                      className="w-full text-left px-4 py-3 hover:bg-gray-50 active:bg-gray-100 flex items-center gap-3 transition-colors touch-manipulation"
-                      onClick={() => {
-                        navigate(`/member/${member.id}`);
-                        setShowSuggestions(false);
-                        setIsSearchExpanded(false);
-                      }}
-                    >
-                      <Avatar src={member.avatar_url || undefined} alt={member.first_name || 'User'} size="sm" />
-                      <div className="min-w-0">
-                        <p className="font-medium text-sm text-brand-black truncate">
-                          {member.first_name} {member.last_name}
-                        </p>
-                        <p className="text-xs text-gray-500 truncate">
-                          {member.job_title || member.promotion || 'Membre'}
-                        </p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Mobile search trigger button */}
-            <button
-              className="sm:hidden p-2 text-gray-500 hover:text-brand-black hover:bg-gray-100 rounded-full transition-colors touch-manipulation"
-              onClick={() => setIsSearchExpanded(true)}
-            >
-              <Search className="w-5 h-5" />
-            </button>
           </div>
           
           {/* Right section - Notifications & Profile */}
           <div className="flex items-center gap-1 sm:gap-3">
             <NotificationDropdown />
             
-            <button 
-              onClick={() => profile?.id && navigate(`/member/${profile.id}`)}
-              className="flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2 sm:pl-3 lg:pl-4 lg:border-l border-gray-200 hover:bg-gray-50 rounded-full sm:rounded-none transition-colors touch-manipulation"
-            >
-              <div className="text-right hidden md:block">
-                <p className="text-sm font-semibold text-brand-black">
-                  {profile?.first_name || 'User'} {profile?.last_name || ''}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {profile?.promotion ? `${profile.promotion}` : 'N/A'}
-                </p>
-              </div>
-              <Avatar 
-                src={profile?.avatar_url || undefined} 
-                alt={profile?.first_name || 'User'} 
-                size="sm" 
-                className="w-8 h-8 sm:w-9 sm:h-9"
-              />
-            </button>
+            {/* Profile Dropdown */}
+            <div className="relative" ref={profileDropdownRef}>
+              <button
+                onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                className="flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2 sm:pl-3 lg:pl-4 lg:border-l border-gray-200 hover:bg-gray-50 rounded-full sm:rounded-none transition-colors touch-manipulation"
+              >
+                <div className="text-right hidden md:block">
+                  <p className="text-sm font-semibold text-brand-black">
+                    {profile?.first_name || 'User'} {profile?.last_name || ''}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {profile?.promotion ? `${profile.promotion}` : 'N/A'}
+                  </p>
+                </div>
+                <Avatar
+                  src={profile?.avatar_url || undefined}
+                  alt={profile?.first_name || 'User'}
+                  size="sm"
+                  className="w-8 h-8 sm:w-9 sm:h-9"
+                />
+              </button>
+
+              {/* Dropdown Menu */}
+              {isProfileDropdownOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 overflow-hidden">
+                  <button
+                    onClick={() => {
+                      profile?.id && navigate(`/member/${profile.id}`);
+                      setIsProfileDropdownOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors touch-manipulation"
+                  >
+                    <User size={20} weight="duotone" className="text-brand-black" />
+                    <span>Profil</span>
+                  </button>
+                  <div className="border-t border-gray-100 my-1" />
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 active:bg-red-100 transition-colors touch-manipulation"
+                  >
+                    <SignOut size={20} weight="duotone" />
+                    <span>Se déconnecter</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
         
