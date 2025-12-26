@@ -4,7 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { JoinRequestModal } from '../components/auth/JoinRequestModal';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
+import { UserPlus } from '@phosphor-icons/react';
 
 export default function Login() {
   const { user } = useAuth();
@@ -13,6 +15,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -158,8 +161,28 @@ export default function Login() {
                     {!loading && <ArrowRight className="w-5 h-5 ml-2" />}
                 </Button>
             </form>
+
+            {/* Join Request Button */}
+            <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+                <p className="text-sm text-gray-500 mb-4">
+                    Vous n'êtes pas encore membre ?
+                </p>
+                <button
+                    onClick={() => setIsJoinModalOpen(true)}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-brand-primary/10 hover:bg-brand-primary/20 text-brand-primary font-semibold rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
+                >
+                    <UserPlus size={20} weight="bold" />
+                    Nous rejoindre
+                </button>
+            </div>
         </div>
       </div>
+
+      {/* Join Request Modal */}
+      <JoinRequestModal
+        isOpen={isJoinModalOpen}
+        onClose={() => setIsJoinModalOpen(false)}
+      />
     </div>
   );
 }

@@ -12,6 +12,7 @@ import Discussions from './pages/Discussions';
 import Connections from './pages/Connections';
 import ProfileView from './pages/ProfileView';
 import EditProfile from './pages/EditProfile';
+import Admin from './pages/Admin';
 import { Messages } from './pages/Messages';
 import { Conversation } from './pages/Conversation';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -85,6 +86,11 @@ function App() {
              <Route path="/profile/edit" element={
               <DashboardLayout>
                 <EditProfile />
+              </DashboardLayout>
+            } />
+            <Route path="/admin" element={
+              <DashboardLayout>
+                <Admin />
               </DashboardLayout>
             } />
              <Route path="/" element={<Navigate to="/home" replace />} />

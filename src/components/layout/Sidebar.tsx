@@ -11,7 +11,8 @@ import {
   CaretLeft,
   CaretRight,
   X,
-  EnvelopeSimple
+  EnvelopeSimple,
+  ShieldCheck
 } from '@phosphor-icons/react';
 import { cn } from '../../lib/utils';
 import { supabase } from '../../lib/supabase';
@@ -28,7 +29,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isCollapsed, toggleSidebar, isMobileOpen = false, closeMobileSidebar }: SidebarProps) {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [pendingCount, setPendingCount] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
 
@@ -88,6 +89,8 @@ export function Sidebar({ isCollapsed, toggleSidebar, isMobileOpen = false, clos
     { icon: ChatTeardropDots, label: 'Discussions', path: '/discussions' },
     { icon: UserPlus, label: 'Connexions', path: '/connections', badge: pendingCount },
     { icon: EnvelopeSimple, label: 'Messages', path: '/messages', badge: unreadMessages },
+    // Admin item - only for super users
+    ...(profile?.is_super_user ? [{ icon: ShieldCheck, label: 'Administration', path: '/admin' }] : []),
   ];
 
   return (

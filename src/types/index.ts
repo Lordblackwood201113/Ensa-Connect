@@ -16,6 +16,24 @@ export interface Profile {
   completion_score: number;
   onboarding_completed?: boolean;
   must_change_password?: boolean;
+  is_super_user?: boolean;
+}
+
+// === DEMANDES D'ADHÉSION ===
+export interface JoinRequest {
+  id: string;
+  full_name: string;
+  email: string;
+  promotion: string;
+  city: string;
+  linkedin_url: string | null;
+  status: 'pending' | 'approved' | 'rejected';
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  rejection_reason: string | null;
+  created_at: string;
+  updated_at: string;
+  reviewer?: Profile;
 }
 
 export interface Experience {
