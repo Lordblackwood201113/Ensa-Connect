@@ -22,7 +22,6 @@ import {
   Trash,
   Crown,
   MagnifyingGlass,
-  CaretDown,
   Warning,
   PaperPlaneTilt,
   Eye
@@ -50,7 +49,6 @@ export default function Admin() {
   const [selectedRequest, setSelectedRequest] = useState<JoinRequest | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
-  const [isMassMessageModalOpen, setIsMassMessageModalOpen] = useState(false);
   const [massMessageData, setMassMessageData] = useState({ subject: '', content: '', targetText: '' });
   const [messageTargets, setMessageTargets] = useState<{ type: 'all' | 'promotion'; value: string }[]>([]);
 

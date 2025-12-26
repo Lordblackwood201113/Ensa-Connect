@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, KeyboardEvent } from 'react';
+import { useState, useEffect, useRef, type KeyboardEvent } from 'react';
 import { At, Users, GraduationCap } from '@phosphor-icons/react';
 import { cn } from '../../lib/utils';
 import { supabase } from '../../lib/supabase';
@@ -29,7 +29,6 @@ export function MentionInput({
   const [suggestions, setSuggestions] = useState<MentionSuggestion[]>([]);
   const [filteredSuggestions, setFilteredSuggestions] = useState<MentionSuggestion[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [mentionQuery, setMentionQuery] = useState('');
   const [cursorPosition, setCursorPosition] = useState(0);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
@@ -116,7 +115,6 @@ export function MentionInput({
 
     if (mentionMatch) {
       const query = mentionMatch[1].toLowerCase();
-      setMentionQuery(query);
 
       // Filter suggestions
       const filtered = suggestions.filter(s => {
