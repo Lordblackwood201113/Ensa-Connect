@@ -7,7 +7,8 @@ import { DiscussionDetailModal } from '../components/discussions/DiscussionDetai
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
-import { Plus, Search, MessageCircle, Grid3x3, Clock, CheckCircle2 } from 'lucide-react';
+import { Search, MessageCircle, Grid3x3, Clock, CheckCircle2 } from 'lucide-react';
+import { Plus } from '@phosphor-icons/react';
 import { cn } from '../lib/utils';
 import type { Discussion } from '../types';
 
@@ -105,11 +106,11 @@ export default function Discussions() {
         </div>
         
         {/* Desktop button */}
-        <Button 
-          onClick={() => setIsCreateModalOpen(true)} 
+        <Button
+          onClick={() => setIsCreateModalOpen(true)}
           className="hidden sm:flex gap-2 shrink-0"
         >
-          <Plus className="w-4 h-4" />
+          <Plus size={18} weight="bold" />
           Nouvelle discussion
         </Button>
       </div>
@@ -189,7 +190,7 @@ export default function Discussions() {
           </p>
           {!searchQuery && filter === 'all' && (
             <Button onClick={() => setIsCreateModalOpen(true)} className="gap-2 text-sm">
-              <Plus className="w-4 h-4" />
+              <Plus size={18} weight="bold" />
               Créer une discussion
             </Button>
           )}
@@ -209,9 +210,9 @@ export default function Discussions() {
       {/* Floating Action Button - Mobile only */}
       <button
         onClick={() => setIsCreateModalOpen(true)}
-        className="sm:hidden fixed bottom-6 right-4 w-14 h-14 bg-brand-black text-white rounded-full shadow-lg flex items-center justify-center z-30 active:scale-95 transition-transform touch-manipulation"
+        className="sm:hidden fixed bottom-20 right-4 w-14 h-14 bg-gradient-to-br from-brand-primary to-brand-primary/80 text-white rounded-2xl shadow-lg shadow-brand-primary/30 flex items-center justify-center z-30 active:scale-95 hover:shadow-xl hover:shadow-brand-primary/40 transition-all touch-manipulation"
       >
-        <Plus className="w-6 h-6" />
+        <Plus size={28} weight="bold" />
       </button>
 
       {/* Modals */}

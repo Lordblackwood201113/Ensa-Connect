@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Plus, Search, Briefcase, Filter, X } from 'lucide-react';
+import { Search, Briefcase, Filter, X } from 'lucide-react';
+import { Plus } from '@phosphor-icons/react';
 import { supabase } from '../lib/supabase';
 import type { Job } from '../types';
 import { JobCard } from '../components/jobs/JobCard';
@@ -79,11 +80,11 @@ export default function Jobs() {
         </div>
         
         {/* Desktop button */}
-        <Button 
-          onClick={() => { setJobToEdit(null); setIsCreateModalOpen(true); }} 
+        <Button
+          onClick={() => { setJobToEdit(null); setIsCreateModalOpen(true); }}
           className="hidden sm:flex gap-2"
         >
-          <Plus className="w-5 h-5" />
+          <Plus size={20} weight="bold" />
           Publier une offre
         </Button>
       </div>
@@ -205,9 +206,9 @@ export default function Jobs() {
       {/* Floating Action Button - Mobile only */}
       <button
         onClick={() => { setJobToEdit(null); setIsCreateModalOpen(true); }}
-        className="sm:hidden fixed bottom-6 right-4 w-14 h-14 bg-brand-black text-white rounded-full shadow-lg flex items-center justify-center z-30 active:scale-95 transition-transform touch-manipulation"
+        className="sm:hidden fixed bottom-20 right-4 w-14 h-14 bg-gradient-to-br from-brand-primary to-brand-primary/80 text-white rounded-2xl shadow-lg shadow-brand-primary/30 flex items-center justify-center z-30 active:scale-95 hover:shadow-xl hover:shadow-brand-primary/40 transition-all touch-manipulation"
       >
-        <Plus className="w-6 h-6" />
+        <Plus size={28} weight="bold" />
       </button>
 
       {/* Modals */}

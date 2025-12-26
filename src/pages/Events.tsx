@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Plus, Calendar } from 'lucide-react';
+import { Calendar } from 'lucide-react';
+import { Plus } from '@phosphor-icons/react';
 import { supabase } from '../lib/supabase';
 import type { Event } from '../types';
 import { EventCard } from '../components/events/EventCard';
@@ -64,11 +65,11 @@ export default function Events() {
         </div>
         
         {/* Desktop button */}
-        <Button 
-          onClick={() => { setEventToEdit(null); setIsCreateModalOpen(true); }} 
+        <Button
+          onClick={() => { setEventToEdit(null); setIsCreateModalOpen(true); }}
           className="hidden sm:flex gap-2"
         >
-          <Plus className="w-5 h-5" />
+          <Plus size={20} weight="bold" />
           Créer un événement
         </Button>
       </div>
@@ -146,9 +147,9 @@ export default function Events() {
       {/* Floating Action Button - Mobile only */}
       <button
         onClick={() => { setEventToEdit(null); setIsCreateModalOpen(true); }}
-        className="sm:hidden fixed bottom-6 right-4 w-14 h-14 bg-brand-black text-white rounded-full shadow-lg flex items-center justify-center z-30 active:scale-95 transition-transform touch-manipulation"
+        className="sm:hidden fixed bottom-20 right-4 w-14 h-14 bg-gradient-to-br from-brand-primary to-brand-primary/80 text-white rounded-2xl shadow-lg shadow-brand-primary/30 flex items-center justify-center z-30 active:scale-95 hover:shadow-xl hover:shadow-brand-primary/40 transition-all touch-manipulation"
       >
-        <Plus className="w-6 h-6" />
+        <Plus size={28} weight="bold" />
       </button>
 
       {/* Modals */}
