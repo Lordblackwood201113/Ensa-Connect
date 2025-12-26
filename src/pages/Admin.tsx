@@ -220,15 +220,31 @@ export default function Admin() {
     if (!confirm(confirmMsg)) return;
 
     try {
-      await supabase
+      const { error } = await supabase
         .from('profiles')
         .update({ is_super_user: newStatus })
         .eq('id', targetUser.id);
 
-      loadUsers();
+      if (error) throw error;
+
+      // Update local state immediately for responsive UI
+      setUsers(users.map(u =>
+        u.id === targetUser.id ? { ...u, is_super_user: newStatus } : u
+      ));
+
+      alert(newStatus
+        ? `${targetUser.first_name} ${targetUser.last_name} est maintenant super utilisateur !`
+        : `${targetUser.first_name} ${targetUser.last_name} n'est plus super utilisateur.`
+      );
     } catch (error: any) {
-      alert(`Erreur: ${error.message}`);
+      console.error('Toggle super user error:', error);
+      alert(`Erreur lors de la modification: ${error.message}`);
     }
+  };
+
+  // Navigate to start a conversation with a user
+  const handleDirectMessage = (targetUser: Profile) => {
+    navigate(`/messages?new=${targetUser.id}`);
   };
 
   const handleDeleteUser = async (targetUser: Profile) => {
@@ -554,6 +570,15 @@ export default function Admin() {
                       <p className="text-xs text-gray-400">{u.promotion}</p>
                     </div>
                     <div className="flex gap-2">
+                      {u.id !== user?.id && (
+                        <button
+                          onClick={() => handleDirectMessage(u)}
+                          className="p-2 rounded-lg bg-brand-primary/10 text-brand-primary hover:bg-brand-primary/20 transition-colors"
+                          title="Envoyer un message"
+                        >
+                          <EnvelopeSimple size={18} weight="bold" />
+                        </button>
+                      )}
                       <button
                         onClick={() => handleToggleSuperUser(u)}
                         className={cn(
@@ -566,13 +591,15 @@ export default function Admin() {
                       >
                         <Crown size={18} weight={u.is_super_user ? "fill" : "regular"} />
                       </button>
-                      <button
-                        onClick={() => handleDeleteUser(u)}
-                        className="p-2 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
-                        title="Supprimer"
-                      >
-                        <Trash size={18} />
-                      </button>
+                      {u.id !== user?.id && (
+                        <button
+                          onClick={() => handleDeleteUser(u)}
+                          className="p-2 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
+                          title="Supprimer"
+                        >
+                          <Trash size={18} />
+                        </button>
+                      )}
                     </div>
                   </div>
                 </Card>

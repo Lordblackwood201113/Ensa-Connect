@@ -4,10 +4,26 @@ import { connectionService } from './connections';
 
 export const messageService = {
   /**
+   * Vérifie si l'utilisateur est un super user
+   */
+  async isSuperUser(userId: string): Promise<boolean> {
+    const { data } = await supabase
+      .from('profiles')
+      .select('is_super_user')
+      .eq('id', userId)
+      .single();
+    return data?.is_super_user === true;
+  },
+
+  /**
    * Vérifie si l'utilisateur peut envoyer un message à un autre utilisateur
-   * Retourne true uniquement si les deux sont connectés
+   * Retourne true si les deux sont connectés OU si l'utilisateur est super user
    */
   async canMessageUser(userId: string, targetUserId: string): Promise<boolean> {
+    // Super users can message anyone
+    const isSuperUser = await this.isSuperUser(userId);
+    if (isSuperUser) return true;
+
     const { status } = await connectionService.getConnectionStatus(userId, targetUserId);
     return status === 'connected';
   },
@@ -80,19 +96,24 @@ export const messageService = {
 
   /**
    * Récupère ou crée une conversation entre deux utilisateurs
+   * Les super users peuvent créer des conversations sans connexion préalable
    */
   async getOrCreateConversation(
     userId: string,
     otherUserId: string
   ): Promise<{ data: Conversation | null; error: Error | null }> {
     try {
-      // 1. Vérifier la connexion
-      const canMessage = await this.canMessageUser(userId, otherUserId);
-      if (!canMessage) {
-        return {
-          data: null,
-          error: new Error('Vous devez être connecté avec cet utilisateur pour lui envoyer un message')
-        };
+      // 1. Vérifier si c'est un super user ou s'ils sont connectés
+      const isSuperUser = await this.isSuperUser(userId);
+
+      if (!isSuperUser) {
+        const canMessage = await this.canMessageUser(userId, otherUserId);
+        if (!canMessage) {
+          return {
+            data: null,
+            error: new Error('Vous devez être connecté avec cet utilisateur pour lui envoyer un message')
+          };
+        }
       }
 
       // 2. Ordonner les IDs pour garantir l'unicité
@@ -110,7 +131,8 @@ export const messageService = {
         return { data: existing as Conversation, error: null };
       }
 
-      // 4. Récupérer l'ID de la connexion
+      // 4. Récupérer l'ID de la connexion (optionnel pour super users)
+      let connectionId = null;
       const { data: connection } = await supabase
         .from('connections')
         .select('id')
@@ -118,7 +140,9 @@ export const messageService = {
         .or(`and(requester_id.eq.${userId},receiver_id.eq.${otherUserId}),and(requester_id.eq.${otherUserId},receiver_id.eq.${userId})`)
         .maybeSingle();
 
-      if (!connection) {
+      if (connection) {
+        connectionId = connection.id;
+      } else if (!isSuperUser) {
         return { data: null, error: new Error('Connexion introuvable') };
       }
 
@@ -128,7 +152,7 @@ export const messageService = {
         .insert({
           participant_1: p1,
           participant_2: p2,
-          connection_id: connection.id,
+          connection_id: connectionId,
         })
         .select()
         .single();

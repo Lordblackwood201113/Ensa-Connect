@@ -79,6 +79,75 @@ CREATE INDEX IF NOT EXISTS idx_join_requests_status ON join_requests(status);
 CREATE INDEX IF NOT EXISTS idx_join_requests_email ON join_requests(email);
 CREATE INDEX IF NOT EXISTS idx_profiles_is_super_user ON profiles(is_super_user);
 
+-- 7b. Allow super users to update any profile (for promoting/demoting users)
+DROP POLICY IF EXISTS "Users can update their own profile" ON profiles;
+CREATE POLICY "Users can update own profile or super users can update any" ON profiles
+    FOR UPDATE USING (
+        id = auth.uid() OR
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE profiles.id = auth.uid()
+            AND profiles.is_super_user = true
+        )
+    );
+
+-- 7c. Allow super users to delete any user profile
+CREATE POLICY "Super users can delete any profile" ON profiles
+    FOR DELETE USING (
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE profiles.id = auth.uid()
+            AND profiles.is_super_user = true
+        )
+    );
+
+-- 7d. Allow super users to create conversations with anyone (bypass connection check)
+DROP POLICY IF EXISTS "Participants can insert conversations" ON conversations;
+CREATE POLICY "Participants or super users can insert conversations" ON conversations
+    FOR INSERT WITH CHECK (
+        -- User is a participant
+        (participant_1 = auth.uid() OR participant_2 = auth.uid())
+        OR
+        -- Or user is a super user
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE profiles.id = auth.uid()
+            AND profiles.is_super_user = true
+        )
+    );
+
+-- 7e. Allow super users to view all conversations
+DROP POLICY IF EXISTS "Participants can view their conversations" ON conversations;
+CREATE POLICY "Participants or super users can view conversations" ON conversations
+    FOR SELECT USING (
+        participant_1 = auth.uid() OR
+        participant_2 = auth.uid() OR
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE profiles.id = auth.uid()
+            AND profiles.is_super_user = true
+        )
+    );
+
+-- 7f. Allow super users to send messages in any conversation
+DROP POLICY IF EXISTS "Participants can send messages" ON messages;
+CREATE POLICY "Participants or super users can send messages" ON messages
+    FOR INSERT WITH CHECK (
+        -- Sender is the authenticated user and is a participant
+        (sender_id = auth.uid() AND EXISTS (
+            SELECT 1 FROM conversations
+            WHERE id = conversation_id
+            AND (participant_1 = auth.uid() OR participant_2 = auth.uid())
+        ))
+        OR
+        -- Or sender is a super user
+        (sender_id = auth.uid() AND EXISTS (
+            SELECT 1 FROM profiles
+            WHERE profiles.id = auth.uid()
+            AND profiles.is_super_user = true
+        ))
+    );
+
 -- 8. Update function to allow super users to delete any job/discussion
 -- This requires updating RLS policies on jobs and discussions tables
 

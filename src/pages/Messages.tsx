@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MessageCircle, Search, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { messageService } from '../lib/messages';
@@ -11,9 +11,29 @@ import { supabase } from '../lib/supabase';
 export function Messages() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [conversations, setConversations] = useState<ConversationWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+
+  // Handle ?new=userId parameter - create conversation and redirect
+  useEffect(() => {
+    const newUserId = searchParams.get('new');
+    if (!newUserId || !user) return;
+
+    const createAndNavigate = async () => {
+      const { data: conversation, error } = await messageService.getOrCreateConversation(user.id, newUserId);
+      if (conversation && !error) {
+        navigate(`/messages/${conversation.id}`, { replace: true });
+      } else if (error) {
+        console.error('Error creating conversation:', error);
+        alert(error.message);
+        navigate('/messages', { replace: true });
+      }
+    };
+
+    createAndNavigate();
+  }, [searchParams, user, navigate]);
 
   useEffect(() => {
     if (!user) return;
