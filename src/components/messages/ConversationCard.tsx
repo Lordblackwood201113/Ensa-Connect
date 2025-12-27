@@ -18,7 +18,7 @@ export function ConversationCard({ conversation, onClick, onDelete }: Props) {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const formatTime = (dateString: string) => {
-    return formatDistanceToNow(new Date(dateString), { addSuffix: true, locale: fr });
+    return formatDistanceToNow(new Date(dateString), { addSuffix: false, locale: fr });
   };
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -37,26 +37,26 @@ export function ConversationCard({ conversation, onClick, onDelete }: Props) {
     setShowConfirm(false);
   };
 
-  // Affichage de la confirmation de suppression
+  // Affichage de la confirmation de suppression - Optimisé mobile
   if (showConfirm) {
     return (
-      <div className="w-full bg-white rounded-2xl p-4 shadow-sm border-2 border-red-200">
-        <p className="text-sm text-gray-700 mb-3">
-          Supprimer la conversation avec <span className="font-medium">{fullName}</span> ?
+      <div className="w-full bg-white rounded-2xl p-3 sm:p-4 border border-red-200 shadow-sm">
+        <p className="text-sm text-gray-700 mb-2">
+          Supprimer la conversation avec <span className="font-semibold">{fullName}</span> ?
         </p>
-        <p className="text-xs text-gray-500 mb-4">
-          Tous les messages seront supprimés définitivement.
+        <p className="text-[11px] text-gray-400 mb-3">
+          Tous les messages seront supprimés.
         </p>
         <div className="flex gap-2">
           <button
             onClick={handleConfirmDelete}
-            className="flex-1 px-4 py-2 bg-red-500 text-white text-sm font-medium rounded-xl hover:bg-red-600 transition-colors"
+            className="flex-1 py-2.5 bg-red-500 text-white text-sm font-medium rounded-xl active:scale-[0.98] transition-transform touch-manipulation"
           >
             Supprimer
           </button>
           <button
             onClick={handleCancelDelete}
-            className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-200 transition-colors"
+            className="flex-1 py-2.5 bg-gray-100 text-gray-600 text-sm font-medium rounded-xl active:scale-[0.98] transition-transform touch-manipulation"
           >
             Annuler
           </button>
@@ -69,66 +69,71 @@ export function ConversationCard({ conversation, onClick, onDelete }: Props) {
     <div className="relative group">
       <button
         onClick={onClick}
-        className="w-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-3 text-left"
+        className="w-full bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-gray-100 hover:shadow-md active:scale-[0.99] transition-all flex items-center gap-3 text-left touch-manipulation"
       >
-      {/* Avatar avec badge */}
-      <div className="relative shrink-0">
-        <Avatar
-          src={other_participant.avatar_url || undefined}
-          alt={fullName}
-          size="md"
-        />
-        {unread_count > 0 && (
-          <span className="absolute -top-1 -right-1 bg-brand-primary text-white text-xs font-medium rounded-full min-w-[20px] h-5 flex items-center justify-center px-1">
-            {unread_count > 99 ? '99+' : unread_count}
-          </span>
-        )}
-      </div>
-
-      {/* Contenu */}
-      <div className="flex-1 min-w-0">
-        <div className="flex flex-col gap-0.5">
-          <h3 className={cn(
-            "font-medium truncate",
-            unread_count > 0 && "text-gray-900"
-          )}>
-            {fullName}
-          </h3>
-          {last_message && (
-            <span className="text-[10px] text-gray-500">
-              {formatTime(last_message.created_at)}
+        {/* Avatar avec badge - Compact sur mobile */}
+        <div className="relative shrink-0">
+          <Avatar
+            src={other_participant.avatar_url || undefined}
+            alt={fullName}
+            size="sm"
+          />
+          {unread_count > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 bg-brand-primary text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">
+              {unread_count > 9 ? '9+' : unread_count}
             </span>
           )}
         </div>
-        <p className={cn(
-          "text-sm truncate mt-0.5",
-          unread_count > 0 ? "text-gray-900 font-medium" : "text-gray-500"
-        )}>
-          {last_message?.content || "Démarrer la conversation..."}
-        </p>
-        {other_participant.job_title && (
-          <p className="text-xs text-gray-400 truncate mt-0.5">
-            {other_participant.job_title}
-            {other_participant.company && ` • ${other_participant.company}`}
-          </p>
-        )}
-      </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-2 shrink-0">
-        {/* Bouton supprimer */}
-        {onDelete && (
-          <button
-            onClick={handleDelete}
-            className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-all opacity-0 group-hover:opacity-100"
-            title="Supprimer la conversation"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        )}
-        {/* Chevron */}
-        <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
-      </div>
+        {/* Contenu - Layout optimisé mobile */}
+        <div className="flex-1 min-w-0 overflow-hidden">
+          {/* Ligne 1: Nom + Temps */}
+          <div className="flex items-center justify-between gap-2">
+            <h3 className={cn(
+              "font-semibold text-sm truncate",
+              unread_count > 0 ? "text-brand-black" : "text-gray-700"
+            )}>
+              {fullName}
+            </h3>
+            {last_message && (
+              <span className="text-[10px] text-gray-400 shrink-0">
+                {formatTime(last_message.created_at)}
+              </span>
+            )}
+          </div>
+
+          {/* Ligne 2: Dernier message */}
+          <p className={cn(
+            "text-[13px] truncate mt-0.5",
+            unread_count > 0 ? "text-gray-800 font-medium" : "text-gray-500"
+          )}>
+            {last_message?.content || "Démarrer la conversation..."}
+          </p>
+
+          {/* Ligne 3: Job title (optionnel) - Seulement desktop */}
+          {other_participant.job_title && (
+            <p className="hidden sm:block text-[11px] text-gray-400 truncate mt-0.5">
+              {other_participant.job_title}
+              {other_participant.company && ` · ${other_participant.company}`}
+            </p>
+          )}
+        </div>
+
+        {/* Actions - Visible sur hover desktop, toujours sur mobile */}
+        <div className="flex items-center gap-1 shrink-0">
+          {/* Bouton supprimer - Plus visible sur mobile */}
+          {onDelete && (
+            <button
+              onClick={handleDelete}
+              className="w-8 h-8 flex items-center justify-center text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all sm:opacity-0 sm:group-hover:opacity-100 touch-manipulation"
+              title="Supprimer"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+          {/* Chevron - Plus petit sur mobile */}
+          <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-300" />
+        </div>
       </button>
     </div>
   );

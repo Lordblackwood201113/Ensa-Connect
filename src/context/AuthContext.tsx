@@ -14,6 +14,18 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Global flag to pause auth state changes during admin user creation
+// This prevents the UI from switching to the newly created user's session
+let authListenerPaused = false;
+
+export function pauseAuthListener() {
+  authListenerPaused = true;
+}
+
+export function resumeAuthListener() {
+  authListenerPaused = false;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -87,15 +99,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Skip processing if auth listener is paused (during admin user creation)
+      if (authListenerPaused) {
+        console.log('Auth listener paused, skipping state change');
+        return;
+      }
+
       setSession(session);
       setUser(session?.user ?? null);
-      
+
       const currentUserId = session?.user?.id;
-      
+
       // Détection robuste du changement d'utilisateur (login ou logout) via ref pour éviter les closures stale
       if (currentUserId !== userIdRef.current) {
           userIdRef.current = currentUserId;
-          
+
           if (session?.user) {
             setLoading(true);
             fetchProfile(session.user.id, session.user).finally(() => setLoading(false));

@@ -78,9 +78,16 @@ select {
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* Smooth touch scrolling for all overflow containers */
+.overflow-x-auto,
+.overflow-y-auto {
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Custom thin scrollbar for desktop */

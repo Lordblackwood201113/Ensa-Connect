@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { MessageCircle, Search, Loader2 } from 'lucide-react';
+import { MessageCircle, Search, Loader2, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { messageService } from '../lib/messages';
 import type { ConversationWithDetails } from '../types';
@@ -15,6 +15,8 @@ export function Messages() {
   const [conversations, setConversations] = useState<ConversationWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [showDeleteAll, setShowDeleteAll] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Handle ?new=userId parameter - create conversation and redirect
   useEffect(() => {
@@ -81,33 +83,104 @@ export function Messages() {
     }
   };
 
+  const handleDeleteAll = async () => {
+    if (!user || deleting) return;
+    setDeleting(true);
+    const { error } = await messageService.deleteAllConversations(user.id);
+    if (!error) {
+      setConversations([]);
+    }
+    setDeleting(false);
+    setShowDeleteAll(false);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-brand-primary" />
+        <Loader2 className="w-6 h-6 animate-spin text-brand-primary" />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-2xl">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <MessageCircle className="w-6 h-6" />
-          Messages
-        </h1>
+    <div className="min-h-screen bg-gray-50/50 -m-4 sm:-m-6 p-3 sm:p-6 pb-24">
+      {/* Modal de confirmation de suppression totale */}
+      {showDeleteAll && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-5 max-w-sm w-full shadow-xl">
+            <div className="w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Trash2 className="w-6 h-6 text-red-500" />
+            </div>
+            <h3 className="text-lg font-bold text-center text-brand-black mb-2">
+              Supprimer toutes les conversations ?
+            </h3>
+            <p className="text-sm text-gray-500 text-center mb-5">
+              Cette action est irréversible. Tous vos messages seront définitivement supprimés.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteAll(false)}
+                disabled={deleting}
+                className="flex-1 py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-xl active:scale-[0.98] transition-transform touch-manipulation disabled:opacity-50"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleDeleteAll}
+                disabled={deleting}
+                className="flex-1 py-2.5 bg-red-500 text-white text-sm font-medium rounded-xl active:scale-[0.98] transition-transform touch-manipulation disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {deleting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  'Supprimer tout'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
+      {/* Header compact */}
+      <div className="mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 bg-gradient-to-br from-brand-primary to-brand-secondary rounded-xl flex items-center justify-center shadow-sm">
+              <MessageCircle className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg sm:text-xl font-bold text-brand-black leading-tight">Messages</h1>
+              {conversations.length > 0 && (
+                <p className="text-[11px] text-gray-400">
+                  {conversations.length} conversation{conversations.length > 1 ? 's' : ''}
+                </p>
+              )}
+            </div>
+          </div>
+          {conversations.length > 0 && (
+            <button
+              onClick={() => setShowDeleteAll(true)}
+              className="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all touch-manipulation"
+              title="Supprimer toutes les conversations"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
+        {/* Barre de recherche - Plus compacte sur mobile */}
         {conversations.length > 0 && (
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Rechercher une conversation..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-gray-100 rounded-xl border-0 focus:ring-2 focus:ring-brand-primary text-sm"
-            />
+          <div className="bg-white rounded-2xl p-2 shadow-sm border border-gray-100">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Rechercher..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 bg-gray-50 rounded-xl border-0 focus:ring-2 focus:ring-brand-primary/20 text-sm focus:outline-none"
+              />
+            </div>
           </div>
         )}
       </div>
@@ -116,8 +189,11 @@ export function Messages() {
       {conversations.length === 0 ? (
         <EmptyMessages />
       ) : filteredConversations.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
-          Aucune conversation trouvée pour "{search}"
+        <div className="bg-white rounded-2xl p-8 text-center border border-gray-100">
+          <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <Search className="w-5 h-5 text-gray-400" />
+          </div>
+          <p className="text-gray-500 text-sm">Aucun résultat pour "{search}"</p>
         </div>
       ) : (
         <div className="space-y-2">

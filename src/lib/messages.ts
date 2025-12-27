@@ -365,4 +365,22 @@ export const messageService = {
       return { error: error as Error };
     }
   },
+
+  /**
+   * Supprime toutes les conversations d'un utilisateur
+   */
+  async deleteAllConversations(userId: string): Promise<{ error: Error | null }> {
+    try {
+      const { error } = await supabase
+        .from('conversations')
+        .delete()
+        .or(`participant_1.eq.${userId},participant_2.eq.${userId}`);
+
+      if (error) throw error;
+      return { error: null };
+    } catch (error) {
+      console.error('Error deleting all conversations:', error);
+      return { error: error as Error };
+    }
+  },
 };

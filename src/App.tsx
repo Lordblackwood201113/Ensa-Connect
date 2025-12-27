@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
+import SetPassword from './pages/SetPassword';
 import DashboardLayout from './layouts/DashboardLayout';
 import Home from './pages/Home';
 import Directory from './pages/Directory';
@@ -29,6 +30,7 @@ function App() {
           <UpdatePrompt />
           <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/set-password" element={<SetPassword />} />
           <Route path="/onboarding" element={<Onboarding />} />
           
           <Route element={<ProtectedRoute />}>

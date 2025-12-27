@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
-import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
-import { Input } from '../components/ui/Input';
+import { messageService } from '../lib/messages';
+import { useAuth, pauseAuthListener, resumeAuthListener } from '../context/AuthContext';
 import { Avatar } from '../components/ui/Avatar';
 import { Modal } from '../components/ui/Modal';
 import { MentionInput } from '../components/admin/MentionInput';
@@ -24,7 +22,9 @@ import {
   MagnifyingGlass,
   Warning,
   PaperPlaneTilt,
-  Eye
+  Eye,
+  Desktop,
+  DeviceMobile
 } from '@phosphor-icons/react';
 
 type AdminTab = 'requests' | 'users' | 'jobs' | 'discussions' | 'messages';
@@ -125,59 +125,128 @@ export default function Admin() {
     if (!user) return;
 
     try {
-      // Generate a temporary password
-      const tempPassword = Math.random().toString(36).slice(-8) + 'A1!';
+      // IMPORTANT: Save the admin's current session BEFORE signUp
+      // Because signUp() automatically logs in the new user
+      const { data: currentSession } = await supabase.auth.getSession();
+      const adminSession = currentSession.session;
 
-      // Create auth user using admin API (requires edge function or service role)
-      // For now, we'll use the sign up method which requires email confirmation
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      if (!adminSession) {
+        throw new Error('Session admin expirée, veuillez vous reconnecter');
+      }
+
+      // Generate a secure random password (user won't know it - they'll reset it)
+      const tempPassword = crypto.randomUUID() + 'Aa1!';
+
+      // PAUSE the auth listener to prevent UI from switching to new user
+      pauseAuthListener();
+
+      // Step 1: Create the user account with signUp
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: request.email,
         password: tempPassword,
-        email_confirm: true,
-        user_metadata: {
-          full_name: request.full_name
-        }
+        options: {
+          data: {
+            full_name: request.full_name,
+            first_name: request.full_name.split(' ')[0],
+            last_name: request.full_name.split(' ').slice(1).join(' ') || request.full_name.split(' ')[0],
+          },
+          emailRedirectTo: `${window.location.origin}/set-password`,
+        },
       });
 
-      if (authError) throw authError;
+      // IMMEDIATELY restore admin session after signUp
+      // This prevents the admin from being logged out
+      const { error: sessionError } = await supabase.auth.setSession({
+        access_token: adminSession.access_token,
+        refresh_token: adminSession.refresh_token,
+      });
 
-      if (authData.user) {
-        // Split full name into first and last name
-        const nameParts = request.full_name.trim().split(' ');
-        const firstName = nameParts[0];
-        const lastName = nameParts.slice(1).join(' ') || nameParts[0];
-
-        // Create profile
-        await supabase.from('profiles').upsert({
-          id: authData.user.id,
-          first_name: firstName,
-          last_name: lastName,
-          email: request.email,
-          promotion: request.promotion,
-          city: request.city,
-          linkedin_url: request.linkedin_url,
-          onboarding_completed: true,
-          must_change_password: true,
-          completion_score: 30
-        });
-
-        // Update request status
-        await supabase
-          .from('join_requests')
-          .update({
-            status: 'approved',
-            reviewed_by: user.id,
-            reviewed_at: new Date().toISOString()
-          })
-          .eq('id', request.id);
-
-        // TODO: Send email with credentials (requires edge function)
-        alert(`Utilisateur créé ! Mot de passe temporaire: ${tempPassword}\n\nNote: L'utilisateur devra changer son mot de passe à la première connexion.`);
-
-        loadJoinRequests();
+      if (sessionError) {
+        console.error('Session restore error:', sessionError);
+        resumeAuthListener(); // Resume before throwing
+        throw new Error('Erreur lors de la restauration de la session admin');
       }
+
+      // Verify session was restored correctly
+      const { data: verifySession } = await supabase.auth.getUser();
+      if (verifySession.user?.id !== user.id) {
+        console.error('Session mismatch:', verifySession.user?.id, 'vs', user.id);
+        resumeAuthListener(); // Resume before throwing
+        throw new Error('La session admin n\'a pas pu être restaurée correctement');
+      }
+
+      // RESUME the auth listener now that we're back to admin session
+      resumeAuthListener();
+
+      if (signUpError) {
+        // Check for existing user
+        if (signUpError.message?.includes('already registered')) {
+          throw new Error('Cet email est déjà enregistré dans le système');
+        }
+        throw signUpError;
+      }
+
+      if (!signUpData.user) {
+        throw new Error('Erreur lors de la création du compte');
+      }
+
+      // Step 2: Create the profile
+      const nameParts = request.full_name.trim().split(' ');
+      const firstName = nameParts[0];
+      const lastName = nameParts.slice(1).join(' ') || nameParts[0];
+
+      const { error: profileError } = await supabase.from('profiles').upsert({
+        id: signUpData.user.id,
+        first_name: firstName,
+        last_name: lastName,
+        email: request.email,
+        promotion: request.promotion,
+        city: request.city,
+        linkedin_url: request.linkedin_url,
+        onboarding_completed: false,
+        must_change_password: true,
+        completion_score: 30,
+      });
+
+      if (profileError) {
+        console.error('Profile creation error:', profileError);
+        // Continue anyway - profile can be created later
+      }
+
+      // Step 3: Send password reset email so user can set their own password
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+        request.email,
+        {
+          redirectTo: `${window.location.origin}/set-password`,
+        }
+      );
+
+      if (resetError) {
+        console.warn('Could not send reset email:', resetError);
+        // Continue anyway - user received confirmation email from signUp
+      }
+
+      // Step 4: Update request status - THIS MUST SUCCEED
+      const { error: updateError } = await supabase
+        .from('join_requests')
+        .update({
+          status: 'approved',
+          reviewed_by: user.id,
+          reviewed_at: new Date().toISOString(),
+        })
+        .eq('id', request.id);
+
+      if (updateError) {
+        console.error('Status update error:', updateError);
+        throw new Error(`Compte créé mais erreur lors de la mise à jour du statut: ${updateError.message}`);
+      }
+
+      alert(`Compte créé pour ${request.email} !\n\nL'utilisateur recevra un email pour confirmer son compte et définir son mot de passe.`);
+
+      loadJoinRequests();
     } catch (error: any) {
       console.error('Error approving request:', error);
+      resumeAuthListener(); // Ensure listener is resumed on error
       alert(`Erreur: ${error.message}`);
     }
   };
@@ -253,17 +322,21 @@ export default function Admin() {
       return;
     }
 
-    if (!confirm(`Supprimer définitivement ${targetUser.first_name} ${targetUser.last_name} ?\n\nCette action est irréversible.`)) {
+    if (!confirm(`Supprimer le profil de ${targetUser.first_name} ${targetUser.last_name} ?\n\nNote: Le compte d'authentification devra être supprimé manuellement depuis le dashboard Supabase.`)) {
       return;
     }
 
     try {
-      // Delete from auth (requires admin API)
-      const { error } = await supabase.auth.admin.deleteUser(targetUser.id);
+      // Delete the profile (the auth user will remain but won't have access)
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', targetUser.id);
+
       if (error) throw error;
 
       loadUsers();
-      alert('Utilisateur supprimé');
+      alert(`Profil de ${targetUser.first_name} ${targetUser.last_name} supprimé.\n\nPour supprimer complètement le compte, allez dans:\nSupabase Dashboard → Authentication → Users`);
     } catch (error: any) {
       alert(`Erreur: ${error.message}`);
     }
@@ -304,6 +377,11 @@ export default function Admin() {
       return;
     }
 
+    if (!user) {
+      alert('Session expirée, veuillez vous reconnecter');
+      return;
+    }
+
     try {
       // Build query based on targets
       let targetUserIds: string[] = [];
@@ -312,8 +390,11 @@ export default function Admin() {
       const hasAll = messageTargets.some(t => t.type === 'all');
 
       if (hasAll) {
-        // Get all users
-        const { data: allUsers } = await supabase.from('profiles').select('id');
+        // Get all users except current user
+        const { data: allUsers } = await supabase
+          .from('profiles')
+          .select('id')
+          .neq('id', user.id);
         if (allUsers) {
           targetUserIds = allUsers.map(u => u.id);
         }
@@ -327,7 +408,8 @@ export default function Admin() {
           const { data: promoUsers } = await supabase
             .from('profiles')
             .select('id')
-            .in('promotion', promotions);
+            .in('promotion', promotions)
+            .neq('id', user.id);
 
           if (promoUsers) {
             targetUserIds = promoUsers.map(u => u.id);
@@ -343,7 +425,49 @@ export default function Admin() {
         return;
       }
 
-      // Create notifications for all target users
+      // Format the message with subject
+      const fullMessage = `📢 **${massMessageData.subject}**\n\n${massMessageData.content}`;
+
+      // Track success/failure
+      let successCount = 0;
+      let failCount = 0;
+
+      // Send actual messages to each user
+      for (const targetUserId of targetUserIds) {
+        try {
+          // Get or create conversation with this user
+          const { data: conversation, error: convError } = await messageService.getOrCreateConversation(
+            user.id,
+            targetUserId
+          );
+
+          if (convError || !conversation) {
+            console.error(`Failed to create conversation with ${targetUserId}:`, convError);
+            failCount++;
+            continue;
+          }
+
+          // Send the message
+          const { error: msgError } = await messageService.sendMessage(
+            conversation.id,
+            user.id,
+            fullMessage
+          );
+
+          if (msgError) {
+            console.error(`Failed to send message to ${targetUserId}:`, msgError);
+            failCount++;
+            continue;
+          }
+
+          successCount++;
+        } catch (err) {
+          console.error(`Error sending to ${targetUserId}:`, err);
+          failCount++;
+        }
+      }
+
+      // Also create notifications for visibility
       const notifications = targetUserIds.map((userId) => ({
         user_id: userId,
         type: 'admin_message' as const,
@@ -351,7 +475,7 @@ export default function Admin() {
         message: massMessageData.content.substring(0, 200),
         link: '/messages',
         is_read: false,
-        triggered_by_id: user?.id
+        triggered_by_id: user.id
       }));
 
       await supabase.from('notifications').insert(notifications);
@@ -361,7 +485,12 @@ export default function Admin() {
         ? 'tous les utilisateurs'
         : messageTargets.filter(t => t.type === 'promotion').map(t => t.value).join(', ');
 
-      alert(`Message envoyé à ${targetUserIds.length} utilisateur(s) (${targetSummary})`);
+      if (failCount > 0) {
+        alert(`Message envoyé à ${successCount}/${targetUserIds.length} utilisateur(s) (${targetSummary})\n\n${failCount} échec(s)`);
+      } else {
+        alert(`Message envoyé à ${successCount} utilisateur(s) (${targetSummary})`);
+      }
+
       setMassMessageData({ subject: '', content: '', targetText: '' });
       setMessageTargets([]);
     } catch (error: any) {
@@ -417,169 +546,235 @@ export default function Admin() {
     { id: 'messages' as const, label: 'Messages', icon: EnvelopeSimple },
   ];
 
+  // État pour afficher/masquer la recherche sur mobile
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
+
   if (!profile?.is_super_user) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <ShieldCheck size={48} className="text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-500">Accès réservé aux administrateurs</p>
+        <div className="text-center px-4">
+          <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <ShieldCheck size={32} className="text-gray-400" />
+          </div>
+          <p className="text-gray-500 text-sm">Accès réservé aux administrateurs</p>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="space-y-6 pb-20">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-12 h-12 bg-gradient-to-br from-brand-primary to-brand-primary/70 rounded-xl flex items-center justify-center">
-          <ShieldCheck size={24} weight="fill" className="text-white" />
-        </div>
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-brand-black">Administration</h1>
-          <p className="text-sm text-gray-500">Gérez le réseau ENSA Connect</p>
-        </div>
+  // Message pour les utilisateurs mobiles
+  const MobileRestrictionMessage = () => (
+    <div className="sm:hidden flex flex-col items-center justify-center min-h-[70vh] px-6 text-center">
+      <div className="w-20 h-20 bg-gradient-to-br from-brand-primary/20 to-brand-secondary/20 rounded-3xl flex items-center justify-center mb-6">
+        <Desktop size={40} weight="duotone" className="text-brand-primary" />
       </div>
+      <h2 className="text-xl font-bold text-brand-black mb-2">
+        Accès réservé aux ordinateurs
+      </h2>
+      <p className="text-gray-500 text-sm mb-6 max-w-xs">
+        La section d'administration nécessite un écran plus grand pour une gestion optimale.
+      </p>
+      <div className="flex items-center gap-2 text-xs text-gray-400 bg-gray-100 px-4 py-2 rounded-full">
+        <DeviceMobile size={14} />
+        <span>Veuillez utiliser un ordinateur</span>
+      </div>
+    </div>
+  );
 
-      {/* Tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
-        {tabs.map((tab) => (
+  return (
+    <>
+      {/* Message de restriction mobile */}
+      <MobileRestrictionMessage />
+
+      {/* Contenu Admin - Visible uniquement sur desktop */}
+      <div className="hidden sm:block min-h-screen bg-gray-50/50 -m-4 sm:-m-6 p-3 sm:p-6 pb-24">
+      {/* Header Compact */}
+      <div className="flex items-center justify-between gap-2 mb-4">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-9 h-9 bg-gradient-to-br from-brand-primary to-brand-secondary rounded-xl flex items-center justify-center shrink-0 shadow-sm">
+            <ShieldCheck size={18} weight="fill" className="text-white" />
+          </div>
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-xl font-bold text-brand-black leading-tight">Admin</h1>
+            <p className="text-[11px] text-gray-400 hidden xs:block">Gestion ENSA Connect</p>
+          </div>
+        </div>
+
+        {/* Bouton recherche mobile */}
+        {activeTab !== 'messages' && (
           <button
-            key={tab.id}
-            onClick={() => { setActiveTab(tab.id); setSearchTerm(''); }}
+            onClick={() => setShowMobileSearch(!showMobileSearch)}
             className={cn(
-              "flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm whitespace-nowrap transition-all touch-manipulation",
-              activeTab === tab.id
-                ? "bg-brand-black text-white"
-                : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
+              "sm:hidden w-9 h-9 rounded-xl flex items-center justify-center transition-colors",
+              showMobileSearch ? "bg-brand-primary text-white" : "bg-white text-gray-500 border border-gray-200"
             )}
           >
-            <tab.icon size={18} weight={activeTab === tab.id ? "fill" : "regular"} />
-            {tab.label}
-            {tab.count !== undefined && tab.count > 0 && (
-              <span className={cn(
-                "text-xs px-1.5 py-0.5 rounded-full font-bold",
-                activeTab === tab.id ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
-              )}>
-                {tab.count}
-              </span>
-            )}
+            <MagnifyingGlass size={18} weight="bold" />
           </button>
-        ))}
+        )}
       </div>
 
-      {/* Search Bar */}
-      {activeTab !== 'messages' && (
-        <Card className="p-3">
-          <div className="relative">
-            <MagnifyingGlass size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Rechercher..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-2.5 bg-gray-50 border-0 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
-            />
-          </div>
+      {/* Navigation Tabs - Style Pills Moderne */}
+      <div className="bg-white rounded-2xl p-1 mb-3 shadow-sm border border-gray-100">
+        <div className="flex gap-0.5 overflow-x-auto scrollbar-hide">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => { setActiveTab(tab.id); setSearchTerm(''); setShowMobileSearch(false); }}
+              className={cn(
+                "flex-1 min-w-0 flex items-center justify-center gap-1 py-2.5 rounded-xl font-medium text-xs transition-all touch-manipulation relative",
+                activeTab === tab.id
+                  ? "bg-brand-black text-white shadow-sm"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+              )}
+            >
+              <tab.icon size={16} weight={activeTab === tab.id ? "fill" : "regular"} className="shrink-0" />
+              <span className="hidden xs:inline truncate">{tab.label}</span>
+              {tab.count !== undefined && tab.count > 0 && (
+                <span className={cn(
+                  "absolute -top-1 -right-1 xs:static xs:ml-1 text-[10px] w-4 h-4 xs:w-auto xs:h-auto xs:px-1.5 xs:py-0.5 rounded-full font-bold flex items-center justify-center",
+                  activeTab === tab.id
+                    ? "bg-white/20 text-white"
+                    : "bg-brand-primary/10 text-brand-primary"
+                )}>
+                  {tab.count > 99 ? '99+' : tab.count}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
 
-          {activeTab === 'requests' && (
-            <div className="flex gap-2 mt-3">
-              {(['all', 'pending', 'approved', 'rejected'] as const).map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => setRequestFilter(filter)}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
-                    requestFilter === filter
-                      ? "bg-brand-primary text-white"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  )}
-                >
-                  {filter === 'all' ? 'Toutes' : filter === 'pending' ? 'En attente' : filter === 'approved' ? 'Approuvées' : 'Rejetées'}
-                </button>
-              ))}
+      {/* Barre de recherche - Expansible sur mobile */}
+      {activeTab !== 'messages' && (
+        <div className={cn(
+          "overflow-hidden transition-all duration-200 mb-3",
+          showMobileSearch ? "max-h-32 opacity-100" : "max-h-0 opacity-0 sm:max-h-32 sm:opacity-100"
+        )}>
+          <div className="bg-white rounded-2xl p-2.5 shadow-sm border border-gray-100">
+            <div className="relative">
+              <MagnifyingGlass size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Rechercher..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 bg-gray-50 border-0 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+              />
             </div>
-          )}
-        </Card>
+
+            {activeTab === 'requests' && (
+              <div className="flex gap-1 mt-2 overflow-x-auto scrollbar-hide">
+                {(['all', 'pending', 'approved', 'rejected'] as const).map((filter) => (
+                  <button
+                    key={filter}
+                    onClick={() => setRequestFilter(filter)}
+                    className={cn(
+                      "px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-colors whitespace-nowrap shrink-0 touch-manipulation",
+                      requestFilter === filter
+                        ? "bg-brand-primary text-white"
+                        : "bg-gray-100 text-gray-500 active:bg-gray-200"
+                    )}
+                  >
+                    {filter === 'all' ? 'Toutes' : filter === 'pending' ? 'En attente' : filter === 'approved' ? 'Approuvées' : 'Rejetées'}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       {/* Content */}
       {loading ? (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {[1, 2, 3].map((i) => (
-            <Card key={i} className="p-4 animate-pulse">
-              <div className="h-16 bg-gray-100 rounded-xl" />
-            </Card>
+            <div key={i} className="bg-white rounded-2xl p-3 animate-pulse border border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gray-100 rounded-xl shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-3 bg-gray-100 rounded-full w-2/3" />
+                  <div className="h-2.5 bg-gray-100 rounded-full w-1/2" />
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       ) : (
         <>
           {/* Join Requests Tab */}
           {activeTab === 'requests' && (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {filteredRequests.length === 0 ? (
-                <Card className="p-8 text-center">
-                  <UserPlus size={40} className="text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-500">Aucune demande</p>
-                </Card>
+                <div className="bg-white rounded-2xl p-8 text-center border border-gray-100">
+                  <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <UserPlus size={24} className="text-gray-300" />
+                  </div>
+                  <p className="text-gray-400 text-sm">Aucune demande</p>
+                </div>
               ) : (
                 filteredRequests.map((request) => (
-                  <Card key={request.id} className="p-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-bold text-brand-black truncate">{request.full_name}</h3>
+                  <div key={request.id} className="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm">
+                    {/* En-tête avec nom et statut */}
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-brand-black text-sm truncate">{request.full_name}</h3>
                           <span className={cn(
-                            "text-xs px-2 py-0.5 rounded-full font-medium",
-                            request.status === 'pending' ? "bg-yellow-100 text-yellow-700" :
-                              request.status === 'approved' ? "bg-green-100 text-green-700" :
-                                "bg-red-100 text-red-700"
+                            "text-[10px] px-1.5 py-0.5 rounded-md font-medium shrink-0",
+                            request.status === 'pending' ? "bg-amber-50 text-amber-600" :
+                              request.status === 'approved' ? "bg-emerald-50 text-emerald-600" :
+                                "bg-red-50 text-red-500"
                           )}>
-                            {request.status === 'pending' ? 'En attente' : request.status === 'approved' ? 'Approuvée' : 'Rejetée'}
+                            {request.status === 'pending' ? 'Attente' : request.status === 'approved' ? 'OK' : 'Rejeté'}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-600">{request.email}</p>
-                        <div className="flex flex-wrap gap-2 mt-2 text-xs text-gray-500">
-                          <span className="bg-gray-100 px-2 py-1 rounded-lg">{request.promotion}</span>
-                          <span className="bg-gray-100 px-2 py-1 rounded-lg">{request.city}</span>
-                          {request.linkedin_url && (
-                            <a
-                              href={request.linkedin_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:underline"
-                            >
-                              LinkedIn
-                            </a>
-                          )}
-                        </div>
-                        <p className="text-xs text-gray-400 mt-2">
-                          Demandé le {new Date(request.created_at).toLocaleDateString('fr-FR')}
-                        </p>
+                        <p className="text-xs text-gray-500 truncate mt-0.5">{request.email}</p>
                       </div>
-
-                      {request.status === 'pending' && (
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            onClick={() => handleApproveRequest(request)}
-                            className="gap-1"
-                          >
-                            <Check size={16} weight="bold" />
-                            Approuver
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => { setSelectedRequest(request); setIsRejectModalOpen(true); }}
-                            className="text-red-600 border-red-200 hover:bg-red-50"
-                          >
-                            <X size={16} weight="bold" />
-                          </Button>
-                        </div>
-                      )}
                     </div>
-                  </Card>
+
+                    {/* Tags inline */}
+                    <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                      <span className="text-[10px] bg-brand-primary/10 text-brand-primary px-2 py-0.5 rounded-md font-medium">
+                        {request.promotion}
+                      </span>
+                      <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-md">
+                        {request.city}
+                      </span>
+                      {request.linkedin_url && (
+                        <a
+                          href={request.linkedin_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[10px] text-blue-500 font-medium"
+                        >
+                          LinkedIn ↗
+                        </a>
+                      )}
+                      <span className="text-[10px] text-gray-400 ml-auto">
+                        {new Date(request.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                      </span>
+                    </div>
+
+                    {/* Actions */}
+                    {request.status === 'pending' && (
+                      <div className="flex gap-2 pt-2 border-t border-gray-100">
+                        <button
+                          onClick={() => handleApproveRequest(request)}
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-brand-primary text-white rounded-xl text-xs font-medium active:scale-[0.98] transition-transform touch-manipulation"
+                        >
+                          <Check size={14} weight="bold" />
+                          <span>Approuver</span>
+                        </button>
+                        <button
+                          onClick={() => { setSelectedRequest(request); setIsRejectModalOpen(true); }}
+                          className="w-10 h-10 flex items-center justify-center bg-red-50 text-red-500 rounded-xl active:scale-[0.98] transition-transform touch-manipulation"
+                        >
+                          <X size={16} weight="bold" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 ))
               )}
             </div>
@@ -587,136 +782,203 @@ export default function Admin() {
 
           {/* Users Tab */}
           {activeTab === 'users' && (
-            <div className="space-y-3">
-              {filteredUsers.map((u) => (
-                <Card key={u.id} className="p-4">
-                  <div className="flex items-center gap-4">
-                    <Avatar src={u.avatar_url || undefined} alt={u.last_name || ''} size="md" />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-brand-black truncate">
-                          {u.first_name} {u.last_name}
-                        </h3>
+            <div className="space-y-2">
+              {filteredUsers.length === 0 ? (
+                <div className="bg-white rounded-2xl p-8 text-center border border-gray-100">
+                  <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <Users size={24} className="text-gray-300" />
+                  </div>
+                  <p className="text-gray-400 text-sm">Aucun utilisateur trouvé</p>
+                </div>
+              ) : (
+                filteredUsers.map((u) => (
+                  <div key={u.id} className="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm">
+                    <div className="flex items-center gap-3">
+                      {/* Avatar compact */}
+                      <div className="relative shrink-0">
+                        <Avatar src={u.avatar_url || undefined} alt={u.last_name || ''} size="sm" />
                         {u.is_super_user && (
-                          <Crown size={16} weight="fill" className="text-yellow-500" />
+                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-amber-400 rounded-full flex items-center justify-center border-2 border-white">
+                            <Crown size={8} weight="fill" className="text-white" />
+                          </div>
                         )}
                       </div>
-                      <p className="text-sm text-gray-500 truncate">{u.email}</p>
-                      <p className="text-xs text-gray-400">{u.promotion}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      {u.id !== user?.id && (
-                        <button
-                          onClick={() => handleDirectMessage(u)}
-                          className="p-2 rounded-lg bg-brand-primary/10 text-brand-primary hover:bg-brand-primary/20 transition-colors"
-                          title="Envoyer un message"
-                        >
-                          <EnvelopeSimple size={18} weight="bold" />
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleToggleSuperUser(u)}
-                        className={cn(
-                          "p-2 rounded-lg transition-colors",
-                          u.is_super_user
-                            ? "bg-yellow-100 text-yellow-600 hover:bg-yellow-200"
-                            : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+
+                      {/* Infos */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-brand-black text-sm truncate">
+                          {u.first_name} {u.last_name}
+                        </h3>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-[10px] bg-brand-primary/10 text-brand-primary px-1.5 py-0.5 rounded font-medium">
+                            {u.promotion || 'N/A'}
+                          </span>
+                          <span className="text-[11px] text-gray-400 truncate">{u.email}</span>
+                        </div>
+                      </div>
+
+                      {/* Actions compactes */}
+                      <div className="flex gap-1.5 shrink-0">
+                        {u.id !== user?.id && (
+                          <button
+                            onClick={() => handleDirectMessage(u)}
+                            className="w-8 h-8 rounded-lg bg-brand-primary/10 text-brand-primary flex items-center justify-center active:scale-95 transition-transform touch-manipulation"
+                          >
+                            <EnvelopeSimple size={14} weight="bold" />
+                          </button>
                         )}
-                        title={u.is_super_user ? "Rétrograder" : "Promouvoir admin"}
-                      >
-                        <Crown size={18} weight={u.is_super_user ? "fill" : "regular"} />
-                      </button>
-                      {u.id !== user?.id && (
                         <button
-                          onClick={() => handleDeleteUser(u)}
-                          className="p-2 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
-                          title="Supprimer"
+                          onClick={() => handleToggleSuperUser(u)}
+                          className={cn(
+                            "w-8 h-8 rounded-lg flex items-center justify-center active:scale-95 transition-transform touch-manipulation",
+                            u.is_super_user
+                              ? "bg-amber-100 text-amber-600"
+                              : "bg-gray-100 text-gray-400"
+                          )}
                         >
-                          <Trash size={18} />
+                          <Crown size={14} weight={u.is_super_user ? "fill" : "regular"} />
                         </button>
-                      )}
+                        {u.id !== user?.id && (
+                          <button
+                            onClick={() => handleDeleteUser(u)}
+                            className="w-8 h-8 rounded-lg bg-red-50 text-red-400 flex items-center justify-center active:scale-95 transition-transform touch-manipulation"
+                          >
+                            <Trash size={14} />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </Card>
-              ))}
+                ))
+              )}
             </div>
           )}
 
           {/* Jobs Tab */}
           {activeTab === 'jobs' && (
-            <div className="space-y-3">
-              {filteredJobs.map((job) => (
-                <Card key={job.id} className="p-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-brand-black">{job.title}</h3>
-                      <p className="text-sm text-gray-600">{job.company} - {job.location}</p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        Par {job.poster?.first_name} {job.poster?.last_name} • {new Date(job.created_at).toLocaleDateString('fr-FR')}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => handleDeleteJob(job)}
-                      className="p-2 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
-                    >
-                      <Trash size={18} />
-                    </button>
+            <div className="space-y-2">
+              {filteredJobs.length === 0 ? (
+                <div className="bg-white rounded-2xl p-8 text-center border border-gray-100">
+                  <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <Briefcase size={24} className="text-gray-300" />
                   </div>
-                </Card>
-              ))}
+                  <p className="text-gray-400 text-sm">Aucune offre d'emploi</p>
+                </div>
+              ) : (
+                filteredJobs.map((job) => (
+                  <div key={job.id} className="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm">
+                    <div className="flex items-start gap-3">
+                      {/* Icône */}
+                      <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
+                        <Briefcase size={16} className="text-blue-500" weight="duotone" />
+                      </div>
+
+                      {/* Contenu */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-brand-black text-sm truncate">{job.title}</h3>
+                        <p className="text-xs text-gray-500 truncate">{job.company} · {job.location}</p>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <span className="text-[10px] text-gray-400">
+                            {job.poster?.first_name} {job.poster?.last_name}
+                          </span>
+                          <span className="text-[10px] text-gray-300">•</span>
+                          <span className="text-[10px] text-gray-400">
+                            {new Date(job.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Action */}
+                      <button
+                        onClick={() => handleDeleteJob(job)}
+                        className="w-8 h-8 rounded-lg bg-red-50 text-red-400 flex items-center justify-center active:scale-95 transition-transform touch-manipulation shrink-0"
+                      >
+                        <Trash size={14} />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           )}
 
           {/* Discussions Tab */}
           {activeTab === 'discussions' && (
-            <div className="space-y-3">
-              {filteredDiscussions.map((discussion) => (
-                <Card key={discussion.id} className="p-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-brand-black">{discussion.title}</h3>
-                      <p className="text-sm text-gray-600 line-clamp-2">{discussion.content}</p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        Par {discussion.author?.first_name} {discussion.author?.last_name} • {new Date(discussion.created_at).toLocaleDateString('fr-FR')}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => handleDeleteDiscussion(discussion)}
-                      className="p-2 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
-                    >
-                      <Trash size={18} />
-                    </button>
+            <div className="space-y-2">
+              {filteredDiscussions.length === 0 ? (
+                <div className="bg-white rounded-2xl p-8 text-center border border-gray-100">
+                  <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <ChatTeardropDots size={24} className="text-gray-300" />
                   </div>
-                </Card>
-              ))}
+                  <p className="text-gray-400 text-sm">Aucune discussion</p>
+                </div>
+              ) : (
+                filteredDiscussions.map((discussion) => (
+                  <div key={discussion.id} className="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm">
+                    <div className="flex items-start gap-3">
+                      {/* Icône */}
+                      <div className="w-9 h-9 bg-purple-50 rounded-xl flex items-center justify-center shrink-0">
+                        <ChatTeardropDots size={16} className="text-purple-500" weight="duotone" />
+                      </div>
+
+                      {/* Contenu */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-brand-black text-sm truncate">{discussion.title}</h3>
+                        <p className="text-xs text-gray-500 line-clamp-1 mt-0.5">{discussion.content}</p>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <span className="text-[10px] text-gray-400">
+                            {discussion.author?.first_name} {discussion.author?.last_name}
+                          </span>
+                          <span className="text-[10px] text-gray-300">•</span>
+                          <span className="text-[10px] text-gray-400">
+                            {new Date(discussion.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Action */}
+                      <button
+                        onClick={() => handleDeleteDiscussion(discussion)}
+                        className="w-8 h-8 rounded-lg bg-red-50 text-red-400 flex items-center justify-center active:scale-95 transition-transform touch-manipulation shrink-0"
+                      >
+                        <Trash size={14} />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           )}
 
           {/* Messages Tab */}
           {activeTab === 'messages' && (
-            <div className="space-y-4">
-              <Card className="p-6">
-                <h3 className="font-bold text-lg text-brand-black mb-4 flex items-center gap-2">
-                  <PaperPlaneTilt size={20} weight="duotone" />
-                  Envoyer un message en masse
-                </h3>
-                <div className="space-y-4">
+            <div className="space-y-3">
+              {/* Message en masse */}
+              <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-8 h-8 bg-brand-primary/10 rounded-lg flex items-center justify-center">
+                    <PaperPlaneTilt size={16} weight="duotone" className="text-brand-primary" />
+                  </div>
+                  <h3 className="font-semibold text-brand-black text-sm">Message en masse</h3>
+                </div>
+
+                <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    <label className="block text-xs font-medium text-gray-500 mb-1.5">
                       Destinataires
                     </label>
                     <MentionInput
                       value={massMessageData.targetText}
                       onChange={(value) => setMassMessageData({ ...massMessageData, targetText: value })}
                       onTargetChange={setMessageTargets}
-                      placeholder="Tapez @tous ou @ensa53 pour cibler..."
+                      placeholder="@tous ou @ensa53..."
                     />
                     {messageTargets.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-2">
+                      <div className="flex flex-wrap gap-1 mt-2">
                         {messageTargets.map((target, idx) => (
                           <span
                             key={idx}
-                            className="inline-flex items-center gap-1 px-2 py-1 bg-brand-primary/10 text-brand-primary text-xs font-medium rounded-lg"
+                            className="inline-flex items-center px-2 py-0.5 bg-brand-primary/10 text-brand-primary text-[10px] font-medium rounded-md"
                           >
                             {target.type === 'all' ? 'Tous' : target.value}
                           </span>
@@ -724,50 +986,69 @@ export default function Admin() {
                       </div>
                     )}
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    <label className="block text-xs font-medium text-gray-500 mb-1.5">
                       Sujet
                     </label>
-                    <Input
-                      required
+                    <input
+                      type="text"
                       placeholder="Sujet du message"
                       value={massMessageData.subject}
                       onChange={(e) => setMassMessageData({ ...massMessageData, subject: e.target.value })}
+                      className="w-full bg-gray-50 border-0 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
                     />
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    <label className="block text-xs font-medium text-gray-500 mb-1.5">
                       Contenu
                     </label>
                     <textarea
-                      rows={4}
-                      className="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-brand-primary resize-none"
+                      rows={3}
+                      className="w-full bg-gray-50 border-0 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20 resize-none"
                       placeholder="Votre message..."
                       value={massMessageData.content}
                       onChange={(e) => setMassMessageData({ ...massMessageData, content: e.target.value })}
                     />
                   </div>
-                  <Button onClick={handleSendMassMessage} className="gap-2" disabled={messageTargets.length === 0}>
-                    <PaperPlaneTilt size={18} weight="bold" />
-                    Envoyer aux destinataires
-                  </Button>
-                </div>
-              </Card>
 
-              <Card className="p-6">
-                <h3 className="font-bold text-lg text-brand-black mb-2 flex items-center gap-2">
-                  <EnvelopeSimple size={20} weight="duotone" />
-                  Messagerie directe
-                </h3>
-                <p className="text-sm text-gray-500 mb-4">
-                  En tant qu'administrateur, vous pouvez envoyer des messages à n'importe quel utilisateur,
-                  même sans connexion préalable.
-                </p>
-                <Button variant="outline" onClick={() => navigate('/messages')} className="gap-2">
-                  <Eye size={18} />
-                  Accéder à la messagerie
-                </Button>
-              </Card>
+                  <button
+                    onClick={handleSendMassMessage}
+                    disabled={messageTargets.length === 0}
+                    className={cn(
+                      "w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all active:scale-[0.98] touch-manipulation",
+                      messageTargets.length === 0
+                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                        : "bg-brand-primary text-white"
+                    )}
+                  >
+                    <PaperPlaneTilt size={16} weight="bold" />
+                    <span>Envoyer</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Messagerie directe */}
+              <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center shrink-0">
+                    <EnvelopeSimple size={18} weight="duotone" className="text-gray-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-brand-black text-sm">Messagerie directe</h3>
+                    <p className="text-[11px] text-gray-400 line-clamp-1">
+                      Envoyer un message à n'importe quel utilisateur
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => navigate('/messages')}
+                    className="w-9 h-9 bg-brand-primary/10 text-brand-primary rounded-xl flex items-center justify-center active:scale-95 transition-transform touch-manipulation shrink-0"
+                  >
+                    <Eye size={16} weight="bold" />
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </>
@@ -778,44 +1059,56 @@ export default function Admin() {
         isOpen={isRejectModalOpen}
         onClose={() => { setIsRejectModalOpen(false); setSelectedRequest(null); setRejectReason(''); }}
         title="Rejeter la demande"
-        size="md"
+        size="sm"
       >
-        <div className="p-6 space-y-4">
-          <div className="flex items-start gap-3 p-4 bg-red-50 rounded-xl">
-            <Warning size={24} weight="fill" className="text-red-500 shrink-0" />
-            <div>
-              <p className="font-medium text-red-700">
-                Rejeter la demande de {selectedRequest?.full_name} ?
+        <div className="p-4 space-y-4">
+          {/* Alerte */}
+          <div className="flex items-start gap-3 p-3 bg-red-50 rounded-xl">
+            <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center shrink-0">
+              <Warning size={16} weight="fill" className="text-red-500" />
+            </div>
+            <div className="min-w-0">
+              <p className="font-medium text-red-700 text-sm truncate">
+                Rejeter {selectedRequest?.full_name} ?
               </p>
-              <p className="text-sm text-red-600 mt-1">
-                Cette personne sera notifiée par email.
+              <p className="text-[11px] text-red-500 mt-0.5">
+                Notification par email envoyée
               </p>
             </div>
           </div>
 
+          {/* Raison */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Raison du rejet (optionnel)
+            <label className="block text-xs font-medium text-gray-500 mb-1.5">
+              Raison (optionnel)
             </label>
             <textarea
-              rows={3}
-              className="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-brand-primary resize-none"
+              rows={2}
+              className="w-full bg-gray-50 border-0 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-200 resize-none"
               placeholder="Expliquez la raison du rejet..."
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
             />
           </div>
 
-          <div className="flex gap-3 justify-end">
-            <Button variant="ghost" onClick={() => setIsRejectModalOpen(false)}>
+          {/* Actions */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => setIsRejectModalOpen(false)}
+              className="flex-1 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 active:scale-[0.98] transition-transform touch-manipulation"
+            >
               Annuler
-            </Button>
-            <Button onClick={handleRejectRequest} className="bg-red-600 hover:bg-red-700">
-              Confirmer le rejet
-            </Button>
+            </button>
+            <button
+              onClick={handleRejectRequest}
+              className="flex-1 py-2.5 rounded-xl text-sm font-medium text-white bg-red-500 active:scale-[0.98] transition-transform touch-manipulation"
+            >
+              Rejeter
+            </button>
           </div>
         </div>
       </Modal>
-    </div>
+      </div>
+    </>
   );
 }

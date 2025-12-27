@@ -215,7 +215,7 @@ export function MentionInput({
   return (
     <div className="relative">
       <div className="relative">
-        <At size={20} className="absolute left-4 top-3 text-gray-400" />
+        <At size={20} className="absolute left-3 sm:left-4 top-3 text-gray-400" />
         <textarea
           ref={inputRef}
           value={value}
@@ -224,9 +224,9 @@ export function MentionInput({
           placeholder={placeholder}
           rows={3}
           className={cn(
-            "w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl",
+            "w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 bg-white border border-gray-200 rounded-xl",
             "focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary/50",
-            "resize-none text-sm",
+            "resize-none text-base sm:text-sm",
             className
           )}
         />
@@ -236,21 +236,21 @@ export function MentionInput({
       {showSuggestions && filteredSuggestions.length > 0 && (
         <div
           ref={suggestionsRef}
-          className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto"
+          className="absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto"
         >
           {filteredSuggestions.map((suggestion, index) => (
             <button
               key={suggestion.value}
               onClick={() => insertMention(suggestion)}
               className={cn(
-                "w-full flex items-center gap-3 px-4 py-3 text-left transition-colors",
+                "w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 text-left transition-colors touch-manipulation",
                 index === selectedIndex
                   ? "bg-brand-primary/10 text-brand-primary"
                   : "hover:bg-gray-50"
               )}
             >
               <div className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center",
+                "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
                 suggestion.type === 'all'
                   ? "bg-brand-primary/20 text-brand-primary"
                   : "bg-gray-100 text-gray-600"
@@ -270,8 +270,8 @@ export function MentionInput({
                 </div>
               </div>
               {suggestion.count !== undefined && (
-                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">
-                  {suggestion.count} utilisateur{suggestion.count > 1 ? 's' : ''}
+                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full shrink-0">
+                  {suggestion.count}
                 </span>
               )}
             </button>
@@ -280,9 +280,9 @@ export function MentionInput({
       )}
 
       {/* Help text */}
-      <p className="text-xs text-gray-400 mt-2 ml-1">
-        Tapez <span className="font-mono bg-gray-100 px-1 rounded">@tous</span> pour tous ou{' '}
-        <span className="font-mono bg-gray-100 px-1 rounded">@ensa53</span> pour une promotion
+      <p className="text-xs text-gray-400 mt-2 ml-1 leading-relaxed">
+        Tapez <span className="font-mono bg-gray-100 px-1 rounded text-gray-600">@tous</span> pour tous ou{' '}
+        <span className="font-mono bg-gray-100 px-1 rounded text-gray-600">@ensa53</span> pour une promo
       </p>
     </div>
   );
