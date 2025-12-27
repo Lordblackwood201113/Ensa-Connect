@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Lock, Eye, EyeOff, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { getErrorMessage } from '../../lib/logger';
 
 interface ForcePasswordChangeModalProps {
   onSuccess: () => void;
@@ -67,11 +68,11 @@ export function ForcePasswordChangeModal({ onSuccess }: ForcePasswordChangeModal
       await refreshProfile();
 
       onSuccess();
-    } catch (err: any) {
-      console.error('Error updating password:', err);
+    } catch (err: unknown) {
+      const errMsg = getErrorMessage(err);
       let errorMessage = 'Une erreur est survenue lors du changement de mot de passe.';
 
-      if (err.message?.includes('should be different')) {
+      if (errMsg.includes('should be different')) {
         errorMessage = 'Le nouveau mot de passe doit être différent de l\'ancien.';
       }
 

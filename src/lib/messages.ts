@@ -1,6 +1,9 @@
 import { supabase } from './supabase';
 import type { Conversation, ConversationWithDetails, Message, Profile } from '../types';
 import { connectionService } from './connections';
+import { createLogger } from './logger';
+
+const log = createLogger('Messages');
 
 export const messageService = {
   /**
@@ -89,7 +92,7 @@ export const messageService = {
 
       return { data: enriched, error: null };
     } catch (error) {
-      console.error('Error fetching conversations:', error);
+      log.error('Erreur récupération conversations', error);
       return { data: [], error: error as Error };
     }
   },
@@ -174,7 +177,7 @@ export const messageService = {
       if (error) throw error;
       return { data: data as Conversation, error: null };
     } catch (error) {
-      console.error('Error creating conversation:', error);
+      log.error('Erreur création conversation', error);
       return { data: null, error: error as Error };
     }
   },
@@ -207,7 +210,7 @@ export const messageService = {
 
       return { data: (data || []) as Message[], error: null };
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      log.error('Erreur récupération messages', error);
       return { data: [], error: error as Error };
     }
   },
@@ -246,7 +249,7 @@ export const messageService = {
       if (error) throw error;
       return { data: data as Message, error: null };
     } catch (error) {
-      console.error('Error sending message:', error);
+      log.error('Erreur envoi message', error);
       return { data: null, error: error as Error };
     }
   },
@@ -263,7 +266,7 @@ export const messageService = {
         .neq('sender_id', userId)
         .eq('is_read', false);
     } catch (error) {
-      console.error('Error marking messages as read:', error);
+      log.error('Erreur marquage messages lus', error);
     }
   },
 
@@ -290,7 +293,7 @@ export const messageService = {
 
       return count || 0;
     } catch (error) {
-      console.error('Error counting unread messages:', error);
+      log.error('Erreur comptage messages non lus', error);
       return 0;
     }
   },
@@ -309,7 +312,7 @@ export const messageService = {
       if (error) throw error;
       return { data: data as Conversation, error: null };
     } catch (error) {
-      console.error('Error fetching conversation:', error);
+      log.error('Erreur récupération conversation', error);
       return { data: null, error: error as Error };
     }
   },
@@ -342,7 +345,7 @@ export const messageService = {
       if (profileError) throw profileError;
       return { data: profile as Profile, error: null };
     } catch (error) {
-      console.error('Error fetching other participant:', error);
+      log.error('Erreur récupération autre participant', error);
       return { data: null, error: error as Error };
     }
   },
@@ -361,7 +364,7 @@ export const messageService = {
       if (error) throw error;
       return { error: null };
     } catch (error) {
-      console.error('Error deleting conversation:', error);
+      log.error('Erreur suppression conversation', error);
       return { error: error as Error };
     }
   },
@@ -379,7 +382,7 @@ export const messageService = {
       if (error) throw error;
       return { error: null };
     } catch (error) {
-      console.error('Error deleting all conversations:', error);
+      log.error('Erreur suppression toutes conversations', error);
       return { error: error as Error };
     }
   },

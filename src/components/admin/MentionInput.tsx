@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type KeyboardEvent } from 'react';
+import { useState, useEffect, useRef, useCallback, type KeyboardEvent } from 'react';
 import { At, Users, GraduationCap } from '@phosphor-icons/react';
 import { cn } from '../../lib/utils';
 import { supabase } from '../../lib/supabase';
@@ -34,11 +34,7 @@ export function MentionInput({
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
   // Load promotions for suggestions
-  useEffect(() => {
-    loadPromotions();
-  }, []);
-
-  const loadPromotions = async () => {
+  const loadPromotions = useCallback(async () => {
     const { data } = await supabase
       .from('profiles')
       .select('promotion')
@@ -73,7 +69,11 @@ export function MentionInput({
 
       setSuggestions([allSuggestion, ...promoSuggestions]);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadPromotions();
+  }, [loadPromotions]);
 
   // Extract mentions from text
   const extractMentions = (text: string): { type: 'all' | 'promotion'; value: string }[] => {

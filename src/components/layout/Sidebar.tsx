@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   House,
   UsersThree,
@@ -33,6 +33,15 @@ export function Sidebar({ isCollapsed, toggleSidebar, isMobileOpen = false, clos
   const [pendingCount, setPendingCount] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
 
+  const loadCounts = useCallback(async () => {
+    if (!user) return;
+
+    const pendingRes = await connectionService.getPendingCount(user.id);
+    setPendingCount(pendingRes.count);
+
+    const unreadCount = await messageService.getUnreadCount(user.id);
+    setUnreadMessages(unreadCount);
+  }, [user]);
 
   useEffect(() => {
     if (user) {
@@ -68,17 +77,7 @@ export function Sidebar({ isCollapsed, toggleSidebar, isMobileOpen = false, clos
         supabase.removeChannel(channel);
       };
     }
-  }, [user]);
-
-  const loadCounts = async () => {
-    if (!user) return;
-
-    const pendingRes = await connectionService.getPendingCount(user.id);
-    setPendingCount(pendingRes.count);
-
-    const unreadCount = await messageService.getUnreadCount(user.id);
-    setUnreadMessages(unreadCount);
-  };
+  }, [user, loadCounts]);
 
   const navItems = [
     { icon: House, label: 'Accueil', path: '/home' },

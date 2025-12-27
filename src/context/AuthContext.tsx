@@ -2,6 +2,9 @@ import { createContext, useContext, useEffect, useState, useRef, type ReactNode 
 import { type Session, type User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import type { Profile } from '../types';
+import { createLogger } from '../lib/logger';
+
+const log = createLogger('Auth');
 
 interface AuthContextType {
   session: Session | null;
@@ -65,18 +68,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             .single();
 
           if (createError) {
-            console.error('Error creating profile:', createError);
+            log.error('Erreur création profil', createError);
           } else {
             setProfile(createdProfile);
           }
         } else {
-          console.error('Error fetching profile:', error);
+          log.error('Erreur récupération profil', error);
         }
       } else {
         setProfile(data);
       }
     } catch (error) {
-      console.error('Unexpected error:', error);
+      log.error('Erreur inattendue', error);
     }
   };
 
@@ -92,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
       }
     }).catch((err) => {
-      console.error("Supabase auth error:", err);
+      log.error('Erreur auth Supabase', err);
       setLoading(false);
     });
 
@@ -101,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       // Skip processing if auth listener is paused (during admin user creation)
       if (authListenerPaused) {
-        console.log('Auth listener paused, skipping state change');
+        log.debug('Auth listener en pause, changement ignoré');
         return;
       }
 

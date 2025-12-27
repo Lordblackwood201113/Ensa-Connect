@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase';
 import { cn, MODAL_FOOTER_CLASSES } from '../../lib/utils';
 import { CheckCircle, UserPlus, LinkedinLogo, MapPin, GraduationCap, EnvelopeSimple, User } from '@phosphor-icons/react';
 import Autocomplete from 'react-google-autocomplete';
+import { getErrorMessage } from '../../lib/logger';
 
 interface JoinRequestModalProps {
   isOpen: boolean;
@@ -83,8 +84,8 @@ export function JoinRequestModal({ isOpen, onClose }: JoinRequestModalProps) {
       }
 
       setSuccess(true);
-    } catch (err: any) {
-      setError(err.message || 'Une erreur est survenue');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
