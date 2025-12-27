@@ -226,7 +226,26 @@ export default function Admin() {
         // Continue anyway - user received confirmation email from signUp
       }
 
-      // Step 4: Update request status - THIS MUST SUCCEED
+      // Step 4: Send custom approval email via Resend
+      try {
+        const { error: emailError } = await supabase.functions.invoke('send-approval-email', {
+          body: {
+            to: request.email,
+            fullName: request.full_name,
+            temporaryPassword: tempPassword,
+          },
+        });
+
+        if (emailError) {
+          console.warn('Could not send approval email:', emailError);
+          // Continue anyway - the account is created
+        }
+      } catch (emailErr) {
+        console.warn('Email function error:', emailErr);
+        // Continue anyway
+      }
+
+      // Step 5: Update request status - THIS MUST SUCCEED
       const { error: updateError } = await supabase
         .from('join_requests')
         .update({
